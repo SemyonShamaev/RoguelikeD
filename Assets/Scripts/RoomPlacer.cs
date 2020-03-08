@@ -14,7 +14,7 @@ public class RoomPlacer : MonoBehaviour
     private void Start()
     {
         spawnedRooms = new Room[11, 11];
-        spawnedRooms[5, 5] = StartingRoom;
+        spawnedRooms[0, 0] = StartingRoom;
 
         for (int i = 0; i < 12; i++)
         {
@@ -42,8 +42,62 @@ public class RoomPlacer : MonoBehaviour
         }
 
         Room newRoom = Instantiate(RoomPrefabs[Random.Range(0, RoomPrefabs.Length)]);
-		Vector2Int position = vacantPlaces.ElementAt(Random.Range(0, vacantPlaces.Count));
-       	newRoom.transform.position = new Vector2(position.x -2,position.y-2) * 10;
-       	spawnedRooms[position.x, position.y] = newRoom;
+
+
+       	int limit = 500;
+        while (limit-- > 0)
+        {
+            Vector2Int position = vacantPlaces.ElementAt(Random.Range(0, vacantPlaces.Count));
+            newRoom.RotateRandomly();
+            if (ConnectToSomething(newRoom, position))
+            {
+                newRoom.transform.position = new Vector2(position.x - 2, position.y - 2) * 10;
+                spawnedRooms[position.x, position.y] = newRoom;
+                return;
+            }
+        }
+        Destroy(newRoom.gameObject);
+    }
+
+     private bool ConnectToSomething(Room room, Vector2Int p)
+    {
+        int maxX = spawnedRooms.GetLength(0) - 1;
+        int maxY = spawnedRooms.GetLength(1) - 1;
+
+        List<Vector2Int> neighbours = new List<Vector2Int>();
+
+        if (room.DoorU != null && p.y < maxY && spawnedRooms[p.x, p.y + 1]?.DoorD != null) neighbours.Add(Vector2Int.up);
+        if (room.DoorD != null && p.y > 0 && spawnedRooms[p.x, p.y - 1]?.DoorU != null) neighbours.Add(Vector2Int.down);
+        if (room.DoorR != null && p.x < maxX && spawnedRooms[p.x + 1, p.y]?.DoorL != null) neighbours.Add(Vector2Int.right);
+        if (room.DoorL != null && p.x > 0 && spawnedRooms[p.x - 1, p.y]?.DoorR != null) neighbours.Add(Vector2Int.left);
+
+        if (neighbours.Count == 0) return false;
+
+        Vector2Int selectedDirection = neighbours[Random.Range(0, neighbours.Count)];
+        Room selectedRoom = spawnedRooms[p.x + selectedDirection.x, p.y + selectedDirection.y];
+	
+        if(selectedDirection == Vector2Int.up)
+        {
+            room.DoorU.SetActive(false);
+            selectedRoom.DoorD.SetActive(false);
+        }
+        if (selectedDirection == Vector2Int.down)
+        {
+            room.DoorD.SetActive(false);
+            selectedRoom.DoorU.SetActive(false);
+        }
+        if (selectedDirection == Vector2Int.right)
+        {
+            room.DoorR.SetActive(false);
+            selectedRoom.DoorL.SetActive(false);
+        }
+        if (selectedDirection == Vector2Int.left)
+        {
+            room.DoorL.SetActive(false);
+            selectedRoom.DoorR.SetActive(false);
+        }
+
+
+        return true;
     }
 }

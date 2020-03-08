@@ -28,11 +28,12 @@ public class Room : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            GameObject tmp = DoorL;
-            DoorL = DoorD;
-            DoorD = DoorR;
-            DoorR = DoorU;
-            DoorU = tmp;
+        	//transform.Rotate(0, 90, 0);
+           // GameObject tmp = DoorL;
+           // DoorL = DoorD;
+           // DoorD = DoorR;
+           // DoorR = DoorU;
+           // DoorU = tmp;
         }
     }
 }
