@@ -43,12 +43,12 @@ ehthumbs.db
 [Dd]esktop.ini
 Corridor/Library/ShaderCache/
 Corridor/Library/metadata/
-Logs
-Library
+/Logs
+/Library
 sublime.sublime-workspace
 sublime.sublime-project
 RogueLike.sln
 Assembly-CSharp.csproj
-.vs
-Packages
-ProjectSettings
+/.vs
+/Packages
+/ProjectSettings

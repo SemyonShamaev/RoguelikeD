@@ -76,6 +76,7 @@ public class RoomPlacer : MonoBehaviour
         Vector2Int selectedDirection = neighbours[Random.Range(0, neighbours.Count)];
         Room selectedRoom = spawnedRooms[p.x + selectedDirection.x, p.y + selectedDirection.y];
 	
+	
         if(selectedDirection == Vector2Int.up)
         {
             room.DoorU.SetActive(false);
