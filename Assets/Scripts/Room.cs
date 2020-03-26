@@ -1,39 +1,54 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Room : MonoBehaviour
+public class Room 
 {
-	public GameObject DoorU;
-    public GameObject DoorR;
-    public GameObject DoorD;
-    public GameObject DoorL;
-	public Mesh[] BlockMeshes;
+	public int xPos;
+	public int yPos;
+	public int roomWidth;
+	public int roomHeight;
+	public Direction enteringCorridor; 
 
-    private void Start()
-    { 	
-        foreach (var filter in GetComponentsInChildren<MeshFilter>())
-        {
-            if (filter.sharedMesh == BlockMeshes[0])
-            {
-                filter.sharedMesh = BlockMeshes[Random.Range(0, BlockMeshes.Length)];
-                filter.transform.rotation = Quaternion.Euler(-90, 0, 90 * Random.Range(0, 4));
-            }
-        }        
-    }
+    public void CreateRoom(int width, int height, int columns, int rows)
+    { 
+ 		roomWidth = width;
+        roomHeight = height;
+ 		xPos = Mathf.RoundToInt(columns / 2f - roomWidth / 2f);
+ 		yPos = Mathf.RoundToInt(rows / 2f - roomHeight / 2f);
+ 	}
 
-    public void RotateRandomly()
-    {
-        int count = Random.Range(0, 4);
-
-        for (int i = 0; i < count; i++)
-        {
-        	//transform.Rotate(0, 90, 0);
-           // GameObject tmp = DoorL;
-           // DoorL = DoorD;
-           // DoorD = DoorR;
-           // DoorR = DoorU;
-           // DoorU = tmp;
-        }
-    }
+	public void CreateRoom(int width, int height, int columns, int rows, Corridor corridor) 
+ 	{
+ 		enteringCorridor = corridor.direction; 
+ 		roomWidth = width; 
+ 		roomHeight = height;
+ 		switch (corridor.direction) 
+ 		{
+ 			case Direction.North:
+ 				roomHeight = Mathf.Clamp(roomHeight, 1, rows - corridor.EndPositionY);
+ 				yPos = corridor.EndPositionY;
+ 				xPos = Random.Range(corridor.EndPositionX - roomWidth + 1, corridor.EndPositionX);
+ 				xPos = Mathf.Clamp(xPos, 0, columns - roomWidth);
+ 				break;
+ 			case Direction.East:
+ 				roomWidth = Mathf.Clamp(roomWidth, 1, columns - corridor.EndPositionX);
+ 				xPos = corridor.EndPositionX;
+ 				yPos = Random.Range(corridor.EndPositionY - roomHeight + 1, corridor.EndPositionY);
+ 				yPos = Mathf.Clamp(yPos, 0, rows - roomHeight);
+ 				break;
+ 			case Direction.South:
+ 				roomHeight = Mathf.Clamp(roomHeight, 1, corridor.EndPositionY);
+ 				yPos = corridor.EndPositionY - roomHeight + 1;
+ 				xPos = Random.Range(corridor.EndPositionX - roomWidth + 1, corridor.EndPositionX);
+ 				xPos = Mathf.Clamp(xPos, 0, columns - roomWidth);
+ 				break;
+ 			case Direction.West:
+ 				roomWidth = Mathf.Clamp(roomWidth, 1, corridor.EndPositionX);
+ 				xPos = corridor.EndPositionX - roomWidth + 1;
+ 				yPos = Random.Range(corridor.EndPositionY - roomHeight + 1, corridor.EndPositionY);
+ 				yPos = Mathf.Clamp(yPos, 0, rows - roomHeight);
+ 				break;
+ 		}
+ 	}
 }

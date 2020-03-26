@@ -4,6 +4,94 @@
 		"selected_items":
 		[
 			[
+				"Y",
+				"yCoord"
+			],
+			[
+				"X",
+				"xCoord"
+			],
+			[
+				"Ma",
+				"MapRows"
+			],
+			[
+				"x",
+				"xPos"
+			],
+			[
+				"a",
+				"AdditionalRooms"
+			],
+			[
+				"Map",
+				"MapRows"
+			],
+			[
+				"L",
+				"Length"
+			],
+			[
+				"D",
+				"Debug"
+			],
+			[
+				"G",
+				"GameObject"
+			],
+			[
+				"r",
+				"roomWidth"
+			],
+			[
+				"c",
+				"currentRoom"
+			],
+			[
+				"Ra",
+				"Range"
+			],
+			[
+				"Rom",
+				"roomWidth"
+			],
+			[
+				"co",
+				"corridorLength"
+			],
+			[
+				"room",
+				"roomHeight"
+			],
+			[
+				"l",
+				"Log"
+			],
+			[
+				"y",
+				"yPos"
+			],
+			[
+				"v",
+				"Vector3"
+			],
+			[
+				"Mesh",
+				"MeshFilter"
+			],
+			[
+				"Mes",
+				"MeshFilter"
+			],
+			[
+				"St",
+				"StartingRoom"
+			],
+			[
+				"S",
+				"StartingRoom"
+			],
+			[
 				"new",
 				"newRoom"
 			],
@@ -28,37 +116,46 @@
 	"buffers":
 	[
 		{
-			"file": "Assets/Scripts/playerController.cs",
-			"settings":
-			{
-				"buffer_size": 518,
-				"encoding": "UTF-8 with BOM",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "Assets/Scripts/userController.cs",
-			"settings":
-			{
-				"buffer_size": 389,
-				"encoding": "UTF-8 with BOM",
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "Assets/Scripts/Room.cs",
 			"settings":
 			{
-				"buffer_size": 997,
-				"encoding": "UTF-8 with BOM",
+				"buffer_size": 1888,
+				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "Assets/Scripts/RoomPlacer.cs",
+			"file": "Assets/Scripts/MotionController.cs",
 			"settings":
 			{
-				"buffer_size": 3592,
+				"buffer_size": 1832,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "Assets/Scripts/RoomGenerator.cs",
+			"settings":
+			{
+				"buffer_size": 5271,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "Assets/Scripts/Enemy.cs",
+			"settings":
+			{
+				"buffer_size": 197,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "Assets/Scripts/Corridor.cs",
+			"settings":
+			{
+				"buffer_size": 2179,
 				"encoding": "UTF-8 with BOM",
 				"line_ending": "Windows"
 			}
@@ -108,8 +205,21 @@
 	],
 	"file_history":
 	[
+		"/C/Users/semas/Desktop/My Game/Assets/Scripts/playerController.cs",
+		"/C/Users/semas/Desktop/My Game/Assets/Scripts/userController.cs",
 		"/C/Users/semas/Desktop/My",
 		"/C/Users/semas/Desktop/My Game/Game/Assets/Scripts/Room.cs",
+		"/C/Users/semas/Desktop/My Game/Assets/Scripts/Mesh_F.cs",
+		"/C/Users/semas/Desktop/My Game/Assets/Scripts/Mesh.cs",
+		"/C/Users/semas/Desktop/My Game/Game/Assets/Scripts/Mesh.cs",
+		"/C/Users/semas/Desktop/My Game/Assets/Scripts/banner_1.cs",
+		"/C/Users/semas/Desktop/My Game/Game/Assets/Scripts/playerController.cs",
+		"/C/Users/semas/Desktop/My Game/Game/Assets/Scripts/RoomGenerator.cs",
+		"/C/Users/semas/Desktop/My Game/Assets/Scripts/RoomGenerator.cs",
+		"/C/Users/semas/Desktop/My Game/Assets/Scripts/Room.cs",
+		"/C/Users/semas/Desktop/My Game/Assets/Scripts/RoomPlacer.cs",
+		"/C/Users/semas/Desktop/My Game/Game/Assets/Scripts/RoomPlacer.cs",
+		"/C/Users/semas/Desktop/My Game/Assets/Scripts/Hallway.cs",
 		"/C/Users/semas/Desktop/ProceduralGeneration-master/Assets/Room.cs",
 		"/C/Users/semas/Desktop/My Game/Assets/Scripts/Generator.cs",
 		"/C/Users/semas/Desktop/My Game/Game/Assets/Scripts/Generator.cs",
@@ -120,7 +230,7 @@
 	],
 	"find":
 	{
-		"height": 27.0
+		"height": 28.0
 	},
 	"find_in_files":
 	{
@@ -134,6 +244,19 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"containersTiles",
+			"2",
+			"WALL",
+			";\n",
+			"wall",
+			"floortile",
+			"wall",
+			"randomindex",
+			"randomposition",
+			"colums",
+			"FLOORTILES",
+			");\n",
+			"DoorL",
 			"            \n"
 		],
 		"highlight": true,
@@ -152,16 +275,102 @@
 	"groups":
 	[
 		{
-			"selected": 3,
+			"selected": 2,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "Assets/Scripts/playerController.cs",
+					"file": "Assets/Scripts/Room.cs",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 518,
+						"buffer_size": 1888,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								183,
+								183
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Unity3D/UnityC#.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "Assets/Scripts/MotionController.cs",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1832,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1532,
+								1532
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Unity3D/UnityC#.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "Assets/Scripts/RoomGenerator.cs",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5271,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3979,
+								3979
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Unity3D/UnityC#.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 483.333333333,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "Assets/Scripts/Enemy.cs",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 197,
 						"regions":
 						{
 						},
@@ -184,20 +393,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "Assets/Scripts/userController.cs",
+					"buffer": 4,
+					"file": "Assets/Scripts/Corridor.cs",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 389,
+						"buffer_size": 2179,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								7,
-								7
+								25,
+								25
 							]
 						],
 						"settings":
@@ -208,63 +417,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "Assets/Scripts/Room.cs",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 997,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								965,
-								965
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Unity3D/UnityC#.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "Assets/Scripts/RoomPlacer.cs",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3592,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3563,
-								3563
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Unity3D/UnityC#.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 733.333333333,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
@@ -272,7 +425,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 27.0
+		"height": 28.0
 	},
 	"input":
 	{
@@ -313,7 +466,7 @@
 	"project": "sublime.sublime-project",
 	"replace":
 	{
-		"height": 50.0
+		"height": 52.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -351,7 +504,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 50.0,
+	"side_bar_width": 244.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{
