@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,6 +13,7 @@ public class Corridor
  	public int startYPos; 
  	public int corridorLength; 
  	public Direction direction;
+
 
  	public int EndPositionX 
  	{
@@ -37,8 +38,8 @@ public class Corridor
  		}
  	}
  	public void CreateCorridor(Room room, int length, int roomWidth, int roomHeight, int columns, int rows, bool firstCorridor) 
- 	{
- 		direction = (Direction)Random.Range(0, 4); 
+ 	{	
+ 		direction = (Direction)Random.Range(0,4); 
  		Direction oppositeDirection = (Direction)(((int)room.enteringCorridor + 2) % 4);
 		
 		if (!firstCorridor && direction == oppositeDirection)

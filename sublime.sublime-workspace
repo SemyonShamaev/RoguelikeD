@@ -4,6 +4,130 @@
 		"selected_items":
 		[
 			[
+				"s",
+				"startX"
+			],
+			[
+				"x",
+				"startX"
+			],
+			[
+				"ran",
+				"randomPosition"
+			],
+			[
+				"S",
+				"step"
+			],
+			[
+				"i",
+				"isMoving"
+			],
+			[
+				"ste",
+				"stepPoint"
+			],
+			[
+				"ta",
+				"targetY"
+			],
+			[
+				"st",
+				"stepPoint"
+			],
+			[
+				"TR",
+				"transform"
+			],
+			[
+				"sta",
+				"startX"
+			],
+			[
+				"TA",
+				"targetX"
+			],
+			[
+				"step",
+				"stepPoint"
+			],
+			[
+				"Ste",
+				"stepPoint"
+			],
+			[
+				"Ve",
+				"Vector2"
+			],
+			[
+				"G",
+				"GameObject"
+			],
+			[
+				"Vec",
+				"Vector3"
+			],
+			[
+				"_",
+				"_startPos"
+			],
+			[
+				"Mo",
+				"MousePos"
+			],
+			[
+				"Che",
+				"CheckCorridorFloor"
+			],
+			[
+				"ch",
+				"CheckCollision"
+			],
+			[
+				"check",
+				"CheckCorridorFloor"
+			],
+			[
+				"Ran",
+				"Random"
+			],
+			[
+				"r",
+				"roomWidth"
+			],
+			[
+				"roo",
+				"rooms"
+			],
+			[
+				"ro",
+				"roomWidth"
+			],
+			[
+				"eme",
+				"enemyTiles"
+			],
+			[
+				"add",
+				"addEnemyOnMap"
+			],
+			[
+				"C",
+				"CheckCorridorFloor"
+			],
+			[
+				"tile",
+				"tileCreated"
+			],
+			[
+				"Ra",
+				"RandomPosition"
+			],
+			[
+				"Y",
+				"yPos"
+			],
+			[
 				"end",
 				"endPosition"
 			],
@@ -12,16 +136,8 @@
 				"positionE"
 			],
 			[
-				"add",
-				"addTilesMap"
-			],
-			[
 				"f",
 				"false"
-			],
-			[
-				"Y",
-				"yCoord"
 			],
 			[
 				"X",
@@ -30,10 +146,6 @@
 			[
 				"Ma",
 				"MapRows"
-			],
-			[
-				"x",
-				"xPos"
 			],
 			[
 				"a",
@@ -52,20 +164,8 @@
 				"Debug"
 			],
 			[
-				"G",
-				"GameObject"
-			],
-			[
-				"r",
-				"roomWidth"
-			],
-			[
 				"c",
 				"currentRoom"
-			],
-			[
-				"Ra",
-				"Range"
 			],
 			[
 				"Rom",
@@ -104,10 +204,6 @@
 				"StartingRoom"
 			],
 			[
-				"S",
-				"StartingRoom"
-			],
-			[
 				"new",
 				"newRoom"
 			],
@@ -135,19 +231,17 @@
 			"file": "Assets/Scripts/Room.cs",
 			"settings":
 			{
-				"buffer_size": 1888,
+				"buffer_size": 1950,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "using System.Collections;\nusing System.Collections.Generic;\nusing UnityEngine;\n\npublic class MotionController : MonoBehaviour\n{\n\tpublic float speed;\n    public float cellSize;\n    bool isMoving = false;\n    Vector3 direction;\n    Vector3 destPos;\n    public GameObject heroBody;\n  \tpublic Sprite[] sprites = new Sprite[4];\n\n    void Update()\n    {\n        if (isMoving == true)\n        {\n            float step = speed * Time.deltaTime;\n            transform.position = Vector3.MoveTowards(transform.position, destPos, step);\n            if (transform.position == destPos) isMoving = false;\n        }\n        else\n        {\n            if (Input.GetKeyDown(KeyCode.W))\n            {\n                direction = Vector3.up;\n                destPos = transform.position + direction * cellSize;\n                heroBody.GetComponent<SpriteRenderer>().sprite = sprites[2];\n                isMoving = true;\n            }\n            else if (Input.GetKeyDown(KeyCode.A))\n            {\n                direction = Vector3.left;\n                destPos = transform.position + direction * cellSize;\n                heroBody.GetComponent<SpriteRenderer>().sprite = sprites[1];\n                isMoving = true;\n            }\n            else if (Input.GetKeyDown(KeyCode.S))\n            {\n                direction = Vector3.down;\n                destPos = transform.position + direction * cellSize;\n                heroBody.GetComponent<SpriteRenderer>().sprite = sprites[0];\n                isMoving = true;\n            }\n            else if (Input.GetKeyDown(KeyCode.D))\n            {\n                direction = Vector3.right;\n                destPos = transform.position + direction * cellSize;\n                heroBody.GetComponent<SpriteRenderer>().sprite = sprites[3];\n                isMoving = true;\n            }\n        }\n    }\n}",
 			"file": "Assets/Scripts/MotionController.cs",
-			"file_size": 1885,
-			"file_write_time": 132303695098917583,
 			"settings":
 			{
-				"buffer_size": 1831,
+				"buffer_size": 4313,
+				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		},
@@ -155,7 +249,7 @@
 			"file": "Assets/Scripts/RoomGenerator.cs",
 			"settings":
 			{
-				"buffer_size": 6342,
+				"buffer_size": 9451,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -164,19 +258,17 @@
 			"file": "Assets/Scripts/Enemy.cs",
 			"settings":
 			{
-				"buffer_size": 197,
+				"buffer_size": 216,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"contents": "using System.Collections;\nusing System.Collections.Generic;\nusing UnityEngine;\n\npublic enum Direction \n{\n North, East, South, West,\n}\n\npublic class Corridor \n{\n   \tpublic int startXPos; \n \tpublic int startYPos; \n \tpublic int corridorLength; \n \tpublic Direction direction;\n\n \tpublic int EndPositionX \n \t{\n \t\tget\n \t\t{\n \t\t\tif (direction == Direction.North || direction == Direction.South)\n \t\t\t\treturn startXPos;\n \t\t\tif (direction == Direction.East)\n \t\t\t\treturn startXPos + corridorLength - 1;\n \t\t\treturn startXPos - corridorLength + 1;\n \t\t}\n \t}\n \tpublic int EndPositionY \n \t{\n \t\tget\n \t\t{\n \t\t\tif (direction == Direction.East || direction == Direction.West)\n \t\t\t\treturn startYPos;\n \t\t\tif (direction == Direction.North)\n \t\t\t\treturn startYPos + corridorLength - 1;\n \t\t\treturn startYPos - corridorLength + 1;\n \t\t}\n \t}\n \tpublic void CreateCorridor(Room room, int length, int roomWidth, int roomHeight, int columns, int rows, bool firstCorridor) \n \t{\n \t\tdirection = (Direction)Random.Range(0, 4); \n \t\tDirection oppositeDirection = (Direction)(((int)room.enteringCorridor + 2) % 4);\n\t\t\n\t\tif (!firstCorridor && direction == oppositeDirection)\n \t\t{ \n \t\t\tint directionInt = (int)direction;\n \t\t\tdirectionInt++;\n \t\t\tdirectionInt = directionInt % 4;\n \t\t\tdirection = (Direction)directionInt;\n \t\t}\n\n \t\tcorridorLength = Random.Range(6,10);\n \t\tint maxLength = 10;\n \t\tswitch (direction) \n \t\t{\n \t\t\tcase Direction.North:\n \t\t\t\tstartXPos = Random.Range(room.xPos, room.xPos + room.roomWidth - 1);\n \t\t\t\tstartYPos = room.yPos + room.roomHeight;\n \t\t\t\tmaxLength = rows - startYPos - 6;\n \t\t\t\tbreak;\n \t\t\tcase Direction.East:\n \t\t\t\tstartXPos = room.xPos + room.roomWidth;\n \t\t\t\tstartYPos = Random.Range(room.yPos, room.yPos + room.roomHeight - 1);\n \t\t\t\tmaxLength = columns - startXPos - 6;\n \t\t\t\tbreak;\n \t\t\tcase Direction.South:\n \t\t\t\tstartXPos = Random.Range(room.xPos, room.xPos + room.roomWidth);\n \t\t\t\tstartYPos = room.yPos;\n \t\t\t\tmaxLength = startYPos - 6;\n \t\t\t\tbreak;\n \t\t\tcase Direction.West:\n \t\t\t\tstartXPos = room.xPos;\n \t\t\t\tstartYPos = Random.Range(room.yPos, room.yPos + room.roomHeight);\n \t\t\t\tmaxLength = startXPos - 6;\n \t\t\t\tbreak;\n \t\t}\n \t\tcorridorLength = Mathf.Clamp(corridorLength, 1, maxLength); \n \t} \n}\n",
 			"file": "Assets/Scripts/Corridor.cs",
-			"file_size": 2261,
-			"file_write_time": 132293257463193466,
 			"settings":
 			{
-				"buffer_size": 2179,
+				"buffer_size": 2180,
+				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		}
@@ -264,6 +356,11 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"end",
+			"object",
+			"end",
+			"enemypos",
+			"index",
 			"getcompo",
 			"containersTiles",
 			"2",
@@ -296,7 +393,7 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -305,15 +402,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1888,
+						"buffer_size": 1950,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								183,
-								183
+								666,
+								666
 							]
 						],
 						"settings":
@@ -321,10 +418,10 @@
 							"syntax": "Packages/Unity3D/UnityC#.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 164.666666667,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -333,15 +430,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1831,
+						"buffer_size": 4313,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								347,
-								347
+								3318,
+								3318
 							]
 						],
 						"settings":
@@ -349,10 +446,10 @@
 							"syntax": "Packages/Unity3D/UnityC#.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 1458.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
@@ -361,15 +458,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6342,
+						"buffer_size": 9451,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								834,
-								834
+								6536,
+								6536
 							]
 						],
 						"settings":
@@ -379,10 +476,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 456.0,
+						"translation.y": 3739.33333333,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -391,15 +488,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 197,
+						"buffer_size": 216,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								25,
-								25
+								167,
+								167
 							]
 						],
 						"settings":
@@ -419,15 +516,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2179,
+						"buffer_size": 2180,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								25,
-								25
+								942,
+								942
 							]
 						],
 						"settings":
@@ -435,7 +532,7 @@
 							"syntax": "Packages/Unity3D/UnityC#.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 114.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 4,
@@ -496,6 +593,10 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"",
+				"Assets\\Scripts\\MotionController.cs"
+			]
 		],
 		"width": 0.0
 	},

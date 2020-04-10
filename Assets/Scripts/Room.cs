@@ -8,6 +8,8 @@ public class Room
 	public int yPos;
 	public int roomWidth;
 	public int roomHeight;
+	public int CorridorPositionX;
+	public int CorridorPositionY;
 	public Direction enteringCorridor; 
 
     public void CreateRoom(int width, int height, int columns, int rows)
