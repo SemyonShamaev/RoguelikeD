@@ -35,14 +35,11 @@ public class RoomGenerator : MonoBehaviour
     private List<Vector3> enemyPositions = new List<Vector3>();
     private Vector3 endPosition;
 
-    int level = 1;
-
     void Update()
     {
         if(Player.transform.position == endPosition)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            ++level;
         }
     }
 

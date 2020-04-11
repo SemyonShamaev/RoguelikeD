@@ -4,35 +4,30 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class MotionController : MonoBehaviour, IPointerDownHandler 
+public class MotionController : MonoBehaviour, IPointerDownHandler, IPointerUpHandler 
 {
 	public float speed;
-    public float cellSize;
 
-	Vector2 _targetPoint;
-	Vector3 point;
+	Vector2 point;
 	Vector3 stepPoint;
-
     bool isMoving = false;
 
-    public GameObject heroBody;
+    public GameObject Player;
     public GameObject Map;
+    public Sprite[] sprites = new Sprite[4];
 
     private RoomGenerator RoomGenerator;
-    public Camera cam;
+    private Camera cam;
+  	
+    public void OnPointerDown(PointerEventData eventData) { }
 
-  	public Sprite[] sprites = new Sprite[4];
-
-
-
-  	public void OnPointerDown(PointerEventData eventData)
-	{
-		_targetPoint.x = eventData.position.x;
-		_targetPoint.y = eventData.position.y;
-		point = cam.ScreenToWorldPoint(new Vector3((int)_targetPoint.x, (int)_targetPoint.y, 0));
-    	isMoving = true;
-
-	}
+    public void OnPointerUp(PointerEventData eventData)
+    {    
+        point.x = eventData.position.x;
+        point.y = eventData.position.y;
+        point = cam.ScreenToWorldPoint(new Vector3((int)point.x, (int)point.y, 0));
+        isMoving = true;
+    }
 
 	void Start()
 	{
@@ -48,17 +43,26 @@ public class MotionController : MonoBehaviour, IPointerDownHandler
     void Update()
     {
     	float step = speed * Time.deltaTime;
-        if (isMoving == true)
+        if (isMoving)
         {
-        	if(transform.position == stepPoint) 
-        	{
-        		(stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)Mathf.Round(point.x), (int)Mathf.Round(point.y)); 
-				Debug.Log("d");
-			}
-            transform.position = Vector2.MoveTowards(transform.position, stepPoint, step);  
-   
-            if (transform.position.x == (int)point.x && transform.position.y == (int)point.y) isMoving = false;
+			if(transform.position == stepPoint) 
+                (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)Mathf.Round(point.x), (int)Mathf.Round(point.y)); 
+            
+            if(stepPoint.x > (int)transform.position.x)
+                Player.GetComponent<SpriteRenderer>().sprite = sprites[0];
+            else if(stepPoint.x < (int)transform.position.x)
+                Player.GetComponent<SpriteRenderer>().sprite = sprites[1];
+            else if(stepPoint.y > (int)transform.position.y)
+                Player.GetComponent<SpriteRenderer>().sprite = sprites[2];
+            else if(stepPoint.y < (int)transform.position.y)
+                Player.GetComponent<SpriteRenderer>().sprite = sprites[3];
 
+            transform.position = Vector2.MoveTowards(transform.position, stepPoint, step);  
+            
+            if(isMoving)
+                cam.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
+            if (transform.position.x == (int)point.x && transform.position.y == (int)point.y) 
+                isMoving = false;     
         }
     }
 
@@ -71,7 +75,7 @@ public class MotionController : MonoBehaviour, IPointerDownHandler
         for (x = 0; x < RoomGenerator.MapColumns; x++)
             for (y = 0; y < RoomGenerator.MapRows; y++)
             {
-                if (RoomGenerator.tiles[x][y] != RoomGenerator.TileType.Floor && RoomGenerator.tiles[x][y] != RoomGenerator.TileType.CorridorFloor)
+                if (RoomGenerator.tiles[x][y] != RoomGenerator.TileType.Floor && RoomGenerator.tiles[x][y] != RoomGenerator.TileType.CorridorFloor && RoomGenerator.tiles[x][y] != RoomGenerator.TileType.End)
                     cMap[x, y] = -2;
                 else
                     cMap[x, y] = -1;
@@ -111,7 +115,7 @@ public class MotionController : MonoBehaviour, IPointerDownHandler
             step++;
             if (cMap[startX, startY] != -1)
                 break;
-            if (step > 16 * 16){
+            if (step > 20 * 20){
             	isMoving = false;
 				return (startX, startY);
             }
@@ -160,8 +164,8 @@ public class MotionController : MonoBehaviour, IPointerDownHandler
 						return (stepX,stepY);
 					}
 			}
+		isMoving = false;
         return (startX,startY);
-        isMoving = false;
     }
 }
 
