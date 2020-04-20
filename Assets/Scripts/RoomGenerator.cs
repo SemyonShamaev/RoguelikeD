@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,42 +7,41 @@ public class RoomGenerator : MonoBehaviour
 
     public enum TileType 
     {
-        Wall, Floor, CorridorFloor, End, Start, Object, Enemy
+        Empty, Wall, Floor, CorridorFloor, End, Start, Object, Enemy
     }
 
 	public int MapColumns; 
     public int MapRows; 
+    public int roomWidth; 
+    public int roomHeight; 
+    public int corridorLength; 
 
     public GameObject[] floorTiles; 
     public GameObject[] wallTiles; 
     public GameObject[] containersTiles;
     public GameObject[] endTiles;
     public GameObject[] enemyTiles;
+    public GameObject Map; 
 
     private Room[] rooms; 
+    private Corridor[] corridors;
+    public Enemy[] enemies;
     private Room EndingRoom;
-    private Corridor[] corridors; 
-
-    public int roomWidth; 
-    public int roomHeight; 
-    public int corridorLength; 
+    private ButtonCreator Btn;
 
     public TileType[][] tiles;
-    public GameObject Map; 
-    public GameObject Player;
+
     private List<Vector3> gridPositions = new List<Vector3>();
     private List<Vector3> enemyPositions = new List<Vector3>();
     private Vector3 endPosition;
 
     void Update()
     {
-        if(Player.transform.position == endPosition)
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
+        if(GameObject.Find("Player").transform.position == endPosition)
+           SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    private void Start()
+    void Start()
     {
         addTilesMap();
         addRoomsAndCorridors();
@@ -63,13 +61,13 @@ public class RoomGenerator : MonoBehaviour
 
     void addRoomsAndCorridors()
     {
-        rooms = new Room[10]; 
+        rooms = new Room[Random.Range(8,10)]; 
         corridors = new Corridor[rooms.Length - 1];
 
         rooms[0] = new Room();
         corridors[0] = new Corridor();
         rooms[0].CreateRoom(roomWidth, roomHeight, MapColumns, MapRows);
-        corridors[0].CreateCorridor(rooms[0], corridorLength, roomWidth, roomHeight,MapColumns, MapRows, true);
+        corridors[0].CreateCorridor(rooms[0], corridorLength, roomWidth, roomHeight, MapColumns, MapRows, true);
 
         for (int i = 1; i < rooms.Length; i++)
         {
@@ -82,6 +80,7 @@ public class RoomGenerator : MonoBehaviour
             if (i < corridors.Length) 
             {
                 corridors[i] = new Corridor();
+                corridorLength = Random.Range(8, 10);
                 corridors[i].CreateCorridor(rooms[i], corridorLength, roomWidth, roomHeight, MapColumns, MapRows, false);
             }
             if(CheckCollision(i))
@@ -119,29 +118,39 @@ public class RoomGenerator : MonoBehaviour
         for (int i = 0; i < rooms.Length; i++) 
         {
             Room currentRoom = rooms[i];
-
-            if (i == rooms.Length - 1) 
-                tiles[rooms[i].xPos + rooms[i].roomHeight/2][rooms[i].yPos + rooms[i].roomWidth/2] = TileType.End;
-
+ 
             for (int j = 0; j < currentRoom.roomWidth; j++) 
             {
                 int xPos = currentRoom.xPos + j;
                 for (int k = 0; k < currentRoom.roomHeight; k++) 
                 {
                     int yPos = currentRoom.yPos + k; 
-                    if(tiles[xPos][yPos]!= TileType.End)
-                        tiles[xPos][yPos] = TileType.Floor;
+                    tiles[xPos][yPos] = TileType.Floor;
+
                     if ((k == 0 || j == 0 || k == roomHeight || j == roomWidth) && CheckCorridorFloor(xPos, yPos))
                         gridPositions.Add(new Vector3(xPos, yPos));
                     else if (i > 0)
                         enemyPositions.Add(new Vector3(xPos, yPos));
                 }
-            }       
+            } 
+
+            if (i == rooms.Length - 1) 
+                tiles[rooms[i].xPos + rooms[i].roomHeight/2][rooms[i].yPos + rooms[i].roomWidth/2] = TileType.End;
         }   
+
+
     }
 
     void addInstance()
     {
+         for (int i = 1; i < tiles.Length - 1; i++)
+        {
+            for (int j = 1; j < tiles[i].Length - 1; j++)
+            {
+                if (tiles[i][j] != TileType.Floor && tiles[i][j] != TileType.CorridorFloor  && tiles[i][j] != TileType.End && CheckFloor(i,j))
+                    tiles[i][j] = TileType.Wall;
+            }
+        }
         for (int i = 1; i < tiles.Length - 1; i++)
         {
             for (int j = 1; j < tiles[i].Length - 1; j++)
@@ -152,25 +161,27 @@ public class RoomGenerator : MonoBehaviour
                     GameObject endInstance = Instantiate(endTiles[0], endPosition, Quaternion.identity) as GameObject;
                     endInstance.transform.parent = Map.transform;
                 }
-                else if (tiles[i][j] != TileType.Floor && tiles[i][j] != TileType.CorridorFloor  && tiles[i][j] != TileType.End && CheckFloor(i,j))
+                else if (tiles[i][j] == TileType.Wall)
                 {
-                    Vector3 positionW = new Vector3(i, j, 0f);
-                    GameObject wallInstance = Instantiate(wallTiles[0], positionW, Quaternion.identity) as GameObject;
+                    Vector3 positionWall = new Vector3(i, j, 0f);
+                    GameObject wallInstance = Instantiate(wallTiles[SelectTileWall(i, j)], positionWall, Quaternion.identity) as GameObject;
                     wallInstance.transform.parent = Map.transform;
                 }
                 else if (tiles[i][j] == TileType.Floor || tiles[i][j] == TileType.CorridorFloor)
                 {
-                    Vector3 positionF = new Vector3(i, j, 0f);
-                    GameObject floorInstance = Instantiate(floorTiles[0], positionF, Quaternion.identity) as GameObject;
+                    Vector3 positionFloor = new Vector3(i, j, 0f);
+                    GameObject floorInstance = Instantiate(floorTiles[0], positionFloor, Quaternion.identity) as GameObject;
                     floorInstance.transform.parent = Map.transform;
                 }    
             }
         }
+
     }
 
     void addObjectsOnMap(GameObject[] tileArray, int minimum, int maximum)
     {
         int objectCount = Random.Range(minimum, maximum + 1);
+
         for (int i = 0; i < objectCount; i++)
         {
             int randomIndex = Random.Range(0, gridPositions.Count);
@@ -185,9 +196,11 @@ public class RoomGenerator : MonoBehaviour
 
     void addEnemyOnMap(GameObject[] tileArray, int minimum, int maximum)
     {
-        int objectCount = Random.Range(minimum, maximum + 1);
-        for (int i = 0; i < objectCount; i++)
+        enemies = new Enemy[Random.Range(minimum, maximum + 1)]; 
+
+        for (int i = 0; i < enemies.Length; i++)
         {
+            enemies[i] = new Enemy();
             int randomIndex = Random.Range(0, enemyPositions.Count);
             Vector3 randomPosition = enemyPositions[randomIndex];
             enemyPositions.RemoveAt(randomIndex);
@@ -195,10 +208,13 @@ public class RoomGenerator : MonoBehaviour
             GameObject tileCreated = Instantiate(tileChoice, randomPosition, Quaternion.identity) as GameObject;
             tileCreated.transform.parent = Map.transform;
             tiles[Mathf.RoundToInt(tileCreated.transform.position.x)][Mathf.RoundToInt(tileCreated.transform.position.y)] = TileType.Enemy;
+            enemies[i].lifes = 3;
+         
+            enemies[i].enemy = tileCreated;
         }
     }
 
-    private bool CheckFloor(int x, int y)
+    bool CheckFloor(int x, int y)
     {
         return tiles[x+1][y]==TileType.Floor || 
                tiles[x-1][y]==TileType.Floor || 
@@ -218,7 +234,7 @@ public class RoomGenerator : MonoBehaviour
                tiles[x-1][y+1]==TileType.CorridorFloor;      
     }
 
-    private bool CheckCorridorFloor(int xPos, int yPos)
+    bool CheckCorridorFloor(int xPos, int yPos)
     {
         return tiles[xPos+1][yPos]!=TileType.CorridorFloor &&
                tiles[xPos][yPos-1]!=TileType.CorridorFloor &&
@@ -232,7 +248,7 @@ public class RoomGenerator : MonoBehaviour
                tiles[xPos-1][yPos-1]!=TileType.CorridorFloor;
     }
 
-    private bool CheckCollision(int n)
+    bool CheckCollision(int n)
     {
         for (int i = 0; i < n; i++)
         {
@@ -243,5 +259,34 @@ public class RoomGenerator : MonoBehaviour
                     return true;
         }
         return false;
+    }
+
+    int SelectTileWall(int x, int y)
+    {
+        if(tiles[x - 1][y] == TileType.Wall && tiles[x + 1][y] == TileType.Wall && (tiles[x][y - 1] == TileType.Floor || tiles[x][y - 1] == TileType.CorridorFloor))
+            return 0;
+        if(tiles[x][y - 1] == TileType.Wall && tiles[x][y + 1] == TileType.Wall && (tiles[x - 1][y] == TileType.Floor || tiles[x - 1][y] == TileType.CorridorFloor))
+            return 1;
+        if(tiles[x][y - 1] == TileType.Wall && tiles[x][y + 1] == TileType.Wall && (tiles[x + 1][y] == TileType.Floor || tiles[x + 1][y] == TileType.CorridorFloor))
+            return 2;
+        if(tiles[x - 1][y] == TileType.Wall && tiles[x + 1][y] == TileType.Wall && (tiles[x][y + 1] == TileType.Floor || tiles[x][y + 1] == TileType.CorridorFloor))
+            return 3;
+        if(tiles[x + 1][y] == TileType.Wall && tiles[x][y - 1] == TileType.Wall && tiles[x - 1][y] != TileType.CorridorFloor && tiles[x][y - 1] != TileType.CorridorFloor && tiles[x][y + 1] != TileType.CorridorFloor)
+            return 4;
+        if(tiles[x - 1][y] == TileType.Wall && tiles[x][y - 1] == TileType.Wall && tiles[x + 1][y] != TileType.CorridorFloor && tiles[x][y + 1] != TileType.CorridorFloor)
+            return 5;
+        if(tiles[x + 1][y] == TileType.Wall && tiles[x][y + 1] == TileType.Wall && tiles[x][y + 1] != TileType.CorridorFloor && tiles[x - 1][y] != TileType.CorridorFloor && tiles[x][y - 1] != TileType.CorridorFloor)
+            return 6;
+        if(tiles[x - 1][y] == TileType.Wall && tiles[x][y + 1] == TileType.Wall && tiles[x][y - 1] != TileType.CorridorFloor && tiles[x + 1][y] != TileType.CorridorFloor)
+            return 7;
+        if(tiles[x + 1][y] == TileType.Wall && tiles[x][y - 1] == TileType.Wall)
+            return 8;
+        if(tiles[x - 1][y] == TileType.Wall && tiles[x][y - 1] == TileType.Wall)
+            return 9;
+        if(tiles[x + 1][y] == TileType.Wall && tiles[x][y + 1] == TileType.Wall)
+            return 10;
+        if(tiles[x - 1][y] == TileType.Wall && tiles[x][y + 1] == TileType.Wall)
+            return 11;
+        return 0;
     }
 }

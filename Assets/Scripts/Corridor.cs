@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum Direction 
@@ -50,7 +48,7 @@ public class Corridor
  			direction = (Direction)directionInt;
  		}
 
- 		corridorLength = Random.Range(6,10);
+ 		corridorLength = length;
  		int maxLength = 10;
  		switch (direction) 
  		{

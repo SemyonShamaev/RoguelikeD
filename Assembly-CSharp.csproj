@@ -55,8 +55,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\ButtonCreator.cs" />
+     <Compile Include="Assets\Scripts\CameraMove.cs" />
      <Compile Include="Assets\Scripts\Corridor.cs" />
      <Compile Include="Assets\Scripts\Enemy.cs" />
+     <Compile Include="Assets\Scripts\HealthBar.cs" />
      <Compile Include="Assets\Scripts\MotionController.cs" />
      <Compile Include="Assets\Scripts\Room.cs" />
      <Compile Include="Assets\Scripts\RoomGenerator.cs" />

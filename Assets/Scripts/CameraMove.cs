@@ -5,6 +5,8 @@ public class CameraMove : MonoBehaviour
 {
     private bool drag = false;
     private bool zoom = false;
+    private float timer = 0;
+    private float _timer = 0;
 
     private Vector3 initialTouchPosition;
     private Vector3 initialCameraPosition;
@@ -24,41 +26,48 @@ public class CameraMove : MonoBehaviour
     {
         if (Input.touchCount == 1)
         {
-            zoom = false;
-            Touch touch0 = Input.GetTouch(0);
-            if (IsTouching(touch0))
-            {
-                if (!drag)
-                {
-                    initialTouchPosition = touch0.position;
-                    initialCameraPosition = this.transform.position;
+        	timer = Time.deltaTime;
+    		_timer = _timer + timer; 
+        	if(_timer > 0.2)
+        	{
+            	zoom = false;
+            	Touch touch0 = Input.GetTouch(0);
+            	if (IsTouching(touch0))
+            	{
+                	if (!drag)
+                	{
+                    	initialTouchPosition = touch0.position;
+                    	initialCameraPosition = this.transform.position;
 
-                    drag = true;
-                }
-                else
-                {
-                    Vector2 delta = camera.ScreenToWorldPoint(touch0.position) - 
+                    	drag = true;
+                	}
+                	else
+                	{
+                    	Vector2 delta = camera.ScreenToWorldPoint(touch0.position) - 
                                     camera.ScreenToWorldPoint(initialTouchPosition);
 
-                    Vector3 newPos = initialCameraPosition;
-                    newPos.x -= delta.x;
-                    newPos.y -= delta.y;
+                    	Vector3 newPos = initialCameraPosition;
+                    	newPos.x -= delta.x;
+                    	newPos.y -= delta.y;
 
-                    this.transform.position = newPos;
-                }
-            }
+                    	this.transform.position = newPos;
+                	}
+            	}
             if (!IsTouching(touch0))
                 drag = false;
+            }
         }
         else
+        {
+        	_timer = 0;
             drag = false;
+        }
 
-        if (Input.touchCount == 2)
+        if (Input.touchCount == 2 )
         {
             drag = false;
             Touch touch0 = Input.GetTouch(0);
             Touch touch1 = Input.GetTouch(1);
-
             if (!zoom)
             {
                 initialTouch0Position = touch0.position;
@@ -92,9 +101,11 @@ public class CameraMove : MonoBehaviour
                 this.transform.position = newPos;
             }
         }
-        else
-            zoom = false;
+    else
+    {
+    	zoom = false;
     }
+	}
 
     static bool IsTouching(Touch touch)
     {
