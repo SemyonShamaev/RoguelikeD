@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class RoomGenerator : MonoBehaviour
+public class Map : MonoBehaviour
 {
 
     public enum TileType 
@@ -21,13 +21,13 @@ public class RoomGenerator : MonoBehaviour
     public GameObject[] containersTiles;
     public GameObject[] endTiles;
     public GameObject[] enemyTiles;
-    public GameObject Map; 
 
     private Room[] rooms; 
     private Corridor[] corridors;
     private Room EndingRoom;
     private ButtonCreator Btn;
 
+    public GameObject[] enemies;
     public TileType[][] tiles;
 
     private List<Vector3> gridPositions = new List<Vector3>();
@@ -158,19 +158,19 @@ public class RoomGenerator : MonoBehaviour
                 {
                     endPosition = new Vector3(i, j, 0f);
                     GameObject endInstance = Instantiate(endTiles[0], endPosition, Quaternion.identity) as GameObject;
-                    endInstance.transform.parent = Map.transform;
+                    endInstance.transform.parent = transform;
                 }
                 else if (tiles[i][j] == TileType.Wall)
                 {
                     Vector3 positionWall = new Vector3(i, j, 0f);
                     GameObject wallInstance = Instantiate(wallTiles[SelectTileWall(i, j)], positionWall, Quaternion.identity) as GameObject;
-                    wallInstance.transform.parent = Map.transform;
+                    wallInstance.transform.parent = transform;
                 }
                 else if (tiles[i][j] == TileType.Floor || tiles[i][j] == TileType.CorridorFloor)
                 {
                     Vector3 positionFloor = new Vector3(i, j, 0f);
                     GameObject floorInstance = Instantiate(floorTiles[0], positionFloor, Quaternion.identity) as GameObject;
-                    floorInstance.transform.parent = Map.transform;
+                    floorInstance.transform.parent = transform;
                 }    
             }
         }
@@ -188,24 +188,24 @@ public class RoomGenerator : MonoBehaviour
             gridPositions.RemoveAt(randomIndex);
             GameObject tileChoice = tileArray[Random.Range(0, tileArray.Length)];
             GameObject tileCreated = Instantiate(tileChoice, randomPosition, Quaternion.identity) as GameObject;
-            tileCreated.transform.parent = Map.transform;
-            tiles[(int)randomPosition.x][(int)randomPosition.y] = TileType.Object;
+            tileCreated.transform.parent = transform;
+            tiles[(int)randomPosition.x][(int)randomPosition.y] = TileType.Object; 
         }
     }
 
     void addEnemyOnMap(GameObject[] tileArray, int minimum, int maximum)
     {
-        int enemyCount = Random.Range(minimum, maximum + 1);
+        enemies = new GameObject[Random.Range(minimum, maximum + 1)]; 
 
-        for (int i = 0; i < enemyCount; i++)
+        for (int i = 0; i <  enemies.Length; i++)
         {
             int randomIndex = Random.Range(0, enemyPositions.Count);
             Vector3 randomPosition = enemyPositions[randomIndex];
             enemyPositions.RemoveAt(randomIndex);
             GameObject tileChoice = tileArray[Random.Range(0, tileArray.Length)];
-            GameObject tileCreated = Instantiate(tileChoice, randomPosition, Quaternion.identity) as GameObject;
-            tileCreated.transform.parent = Map.transform;
-            tiles[Mathf.RoundToInt(tileCreated.transform.position.x)][Mathf.RoundToInt(tileCreated.transform.position.y)] = TileType.Enemy;
+            enemies[i] = Instantiate(tileChoice, randomPosition, Quaternion.identity) as GameObject;
+            enemies[i].transform.parent = transform;
+            tiles[Mathf.RoundToInt(enemies[i].transform.position.x)][Mathf.RoundToInt(enemies[i].transform.position.y)] = TileType.Enemy;
         }
     }
 
