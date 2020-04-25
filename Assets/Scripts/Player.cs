@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using Rogue;
 
-public class Player : MonoBehaviour, IPointerDownHandler, IPointerUpHandler 
+public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler 
 {
     public float speed;
     public int stepCount;
@@ -15,10 +16,11 @@ public class Player : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public bool isMoving = false;
 
     public Sprite[] sprites = new Sprite[4];
-    private Map Map;
     private Camera cam;
     Animation anim;
     
+
+
 
     public void OnPointerDown(PointerEventData eventData) //вызывается когда мышь нажата 
     { 
@@ -28,11 +30,12 @@ public class Player : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {   
         point = cam.ScreenToWorldPoint(new Vector3((int)Mathf.Round(eventData.position.x), (int)Mathf.Round(eventData.position.y), 0)); //из локальных координат в мировые
         point = new Vector2((int)Mathf.Round(point.x), (int)Mathf.Round(point.y));
-        isMoving = true; //запуск движения
+        isMoving = true; //запуск движения`
     }
 
     void Start()
     {
+        Application.targetFrameRate = 60;
         anim = gameObject.GetComponent<Animation>();
         cam = Camera.main;
         stepPoint = transform.position;
@@ -40,55 +43,60 @@ public class Player : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     void Update()
     {   
-        if (isMoving && !isAnimation)
+        if (isMoving)
         {
             Move();  
         }
     }
 
-    void Awake()
-    {
-        Map = GameObject.Find("Map").GetComponent<Map>();
-    }
-
     void Move()
     {
         float step = speed * Time.deltaTime;
-        if(transform.position == stepPoint)
+        
+        if(transform.position == stepPoint && !isAnimation)
         {
-            for(int i = 0; i < Map.enemies.Length; i++)
+            for(int i = 0; i < Map.Instance.enemies.Length; i++)
             {
-                Enemy enemy = Map.enemies[i].GetComponent<Enemy>();
+                Enemy enemy = Map.Instance.enemies[i].GetComponent<Enemy>();
                 enemy.isPunch = true;
             }
-            (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)Mathf.Round(point.x), (int)Mathf.Round(point.y)); 
+            (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y); 
         }
-        if(Map.tiles[(int)stepPoint.x][(int)stepPoint.y] == Map.TileType.Enemy)
+
+        if(Map.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Map.TileType.Enemy)
         {
             HitEnemy((int)stepPoint.x, (int)stepPoint.y);
             stepPoint = transform.position;
             isMoving = false;
         }
-        if(Map.tiles[(int)stepPoint.x][(int)stepPoint.y] == Map.TileType.Wall || Map.tiles[(int)stepPoint.x][(int)stepPoint.y] == Map.TileType.Object)
+        else if(Map.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Map.TileType.Wall || Map.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Map.TileType.Object)
+        {        
             stepPoint = transform.position;
+            isMoving = false;
+        }
+
+        else if (transform.position.x == (int)point.x && transform.position.y == (int)point.y)
+            isMoving = false; 
+
         else
         {
             ChangeSprite();
             transform.position = Vector2.MoveTowards(transform.position, stepPoint, step);  
             cam.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
-            if (transform.position.x == (int)point.x && transform.position.y == (int)point.y)
-            isMoving = false;    
+  
         }  
     }
 
     void HitEnemy(int x, int y)
     {
-        for(int i = 0; i < Map.enemies.Length; i++)
+        for(int i = 0; i < Map.Instance.enemies.Length; i++)
         {
-            Enemy enemy = Map.enemies[i].GetComponent<Enemy>();
+            Enemy enemy = Map.Instance.enemies[i].GetComponent<Enemy>();
             enemy.isPunch = true;
-            if(x == Map.enemies[i].transform.position.x && y == Map.enemies[i].transform.position.y)
+            enemy.isStep = true;
+            if(x == Map.Instance.enemies[i].transform.position.x && y == Map.Instance.enemies[i].transform.position.y)
             {
+                ChangeSprite();
                 enemy.getDamage(1);
             }
         }
@@ -104,21 +112,21 @@ public class Player : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         if((sx == x - 1 && sy == y) || (sx == x + 1 && sy == y) || (sx == x && sy == y - 1) || (sx == x && sy == y + 1))
             return (x,y);
-        if((Map.tiles[x+1][y]==Map.TileType.Floor || Map.tiles[x+1][y]==Map.TileType.CorridorFloor) && sx>x)
+        if((Map.Instance.tiles[x+1][y]==Map.TileType.Floor || Map.Instance.tiles[x+1][y]==Map.TileType.CorridorFloor) && sx>x)
             return (x+1,y);
-        if((Map.tiles[x-1][y]==Map.TileType.Floor || Map.tiles[x-1][y]==Map.TileType.CorridorFloor) && sx<x)
+        if((Map.Instance.tiles[x-1][y]==Map.TileType.Floor || Map.Instance.tiles[x-1][y]==Map.TileType.CorridorFloor) && sx<x)
             return (x-1,y);
-        if((Map.tiles[x][y+1]==Map.TileType.Floor || Map.tiles[x][y+1]==Map.TileType.CorridorFloor) && sy>y)
+        if((Map.Instance.tiles[x][y+1]==Map.TileType.Floor || Map.Instance.tiles[x][y+1]==Map.TileType.CorridorFloor) && sy>y)
             return (x,y+1);
-        if((Map.tiles[x][y-1]==Map.TileType.Floor || Map.tiles[x][y-1]==Map.TileType.CorridorFloor) && sy<y)
+        if((Map.Instance.tiles[x][y-1]==Map.TileType.Floor || Map.Instance.tiles[x][y-1]==Map.TileType.CorridorFloor) && sy<y)
             return (x,y-1);
-        if(Map.tiles[x+1][y]==Map.TileType.Floor || Map.tiles[x+1][y]==Map.TileType.CorridorFloor)
+        if(Map.Instance.tiles[x+1][y]==Map.TileType.Floor || Map.Instance.tiles[x+1][y]==Map.TileType.CorridorFloor)
             return (x+1,y);
-        if(Map.tiles[x-1][y]==Map.TileType.Floor || Map.tiles[x-1][y]==Map.TileType.CorridorFloor)
+        if(Map.Instance.tiles[x-1][y]==Map.TileType.Floor || Map.Instance.tiles[x-1][y]==Map.TileType.CorridorFloor)
             return (x-1,y);
-        if(Map.tiles[x][y+1]==Map.TileType.Floor || Map.tiles[x][y+1]==Map.TileType.CorridorFloor)
+        if(Map.Instance.tiles[x][y+1]==Map.TileType.Floor || Map.Instance.tiles[x][y+1]==Map.TileType.CorridorFloor)
             return (x,y+1);
-        if(Map.tiles[x][y-1]==Map.TileType.Floor || Map.tiles[x][y-1]==Map.TileType.CorridorFloor)
+        if(Map.Instance.tiles[x][y-1]==Map.TileType.Floor || Map.Instance.tiles[x][y-1]==Map.TileType.CorridorFloor)
             return (x,y-1);
         return((int)transform.position.x, (int)transform.position.y);
     }
@@ -149,14 +157,14 @@ public class Player : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         int x, y,step=0;
         int stepX = 0, stepY = 0;
-        int[,] cMap = new int[Map.MapColumns, Map.MapRows];
+        int[,] cMap = new int[Map.Instance.MapColumns, Map.Instance.MapRows];
 
-        for (x = 0; x < Map.MapColumns; x++) //заполнение массива числами
-            for (y = 0; y < Map.MapRows; y++)
+        for (x = 0; x < Map.Instance.MapColumns; x++) //заполнение массива числами
+            for (y = 0; y < Map.Instance.MapRows; y++)
             {
-                if (Map.tiles[x][y] != Map.TileType.Floor && 
-                    Map.tiles[x][y] != Map.TileType.CorridorFloor && 
-                    Map.tiles[x][y] != Map.TileType.End)
+                if (Map.Instance.tiles[x][y] != Map.TileType.Floor && 
+                    Map.Instance.tiles[x][y] != Map.TileType.CorridorFloor && 
+                    Map.Instance.tiles[x][y] != Map.TileType.End)
                     cMap[x, y] = -2; //есть препятствие
                 else
                     cMap[x, y] = -1; //путь свободен
@@ -186,11 +194,11 @@ public class Player : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
                             if (cMap[x, y - 1] == -1)
                                 cMap[x, y - 1] = step + 1;
                         
-                            if (x + 1 < Map.MapColumns)
+                            if (x + 1 < Map.Instance.MapColumns)
                             if (cMap[x + 1, y] == -1)
                                 cMap[x + 1, y] = step + 1;
 
-                            if (y + 1 < Map.MapRows)
+                            if (y + 1 < Map.Instance.MapRows)
                             if (cMap[x, y + 1] == -1)
                                 cMap[x, y + 1] = step + 1;
                     }
@@ -224,7 +232,7 @@ public class Player : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
                 stepY = y - 1;
                 return (stepX,stepY);
             }      
-        if (x + 1 < Map.MapRows)
+        if (x + 1 < Map.Instance.MapRows)
             if (cMap[x + 1, y] < step && cMap[x + 1, y] >= 0)
             {
                 step = cMap[x + 1, y];
@@ -232,7 +240,7 @@ public class Player : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
                 stepY = y;
                 return (stepX,stepY);
             }                
-        if (y + 1 < Map.MapColumns )
+        if (y + 1 < Map.Instance.MapColumns )
             if (cMap[x, y + 1] < step && cMap[x, y + 1] >= 0)
             {
                 step = cMap[x, y + 1];

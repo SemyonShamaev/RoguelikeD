@@ -6,11 +6,12 @@ public class Enemy : MonoBehaviour
 	public float speed;
 	public int lifes;
 	public bool isPunch;
+	public bool isStep = false;
 	Vector3 stepPoint;
 	Vector3 playerPosition;
 
-	Map Map;
-	Player Player;
+	public GameObject[] drops;
+
 	Animation anim;
 
 	void Start()
@@ -27,7 +28,7 @@ public class Enemy : MonoBehaviour
  		else if(CheckPlayerNearby())
  			Punch();
 
-    	else if(checkPlayerSees() && Player.isMoving)
+    	else if(checkPlayerSees() && (Player.Instance.isMoving || isStep))
 			Move();
 
 		float step = speed * Time.deltaTime;
@@ -36,8 +37,6 @@ public class Enemy : MonoBehaviour
 
     void Awake()
     {
-    	Player = GameObject.Find("Player").GetComponent<Player>();
-    	Map = GameObject.Find("Map").GetComponent<Map>();
     	stepPoint = transform.position;
     }
 
@@ -45,32 +44,32 @@ public class Enemy : MonoBehaviour
     {
     	if(transform.position == stepPoint)
 		{
-			playerPosition = Player.stepPoint;
+			playerPosition = Player.Instance.stepPoint;
        		(stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y,  (int)Mathf.Round(playerPosition.x),  (int)Mathf.Round(playerPosition.y));   
        		    
        		if(stepPoint == playerPosition)
        		    stepPoint = transform.position;
        		else
        		{
-       		  	Map.tiles[(int)transform.position.x][(int)transform.position.y] = Map.TileType.Floor;
-       		    Map.tiles[(int)stepPoint.x][(int)stepPoint.y] = Map.TileType.Enemy;	
+       		  	Map.Instance.tiles[(int)transform.position.x][(int)transform.position.y] = Map.TileType.Floor;
+       		    Map.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] = Map.TileType.Enemy;	
        		}	   
 		}
-
+		isStep = false;
     }
 
     void Death()
     {
     	enemy.SetActive(false); 
-    	Map.tiles[(int)enemy.transform.position.x][(int)enemy.transform.position.y] = Map.TileType.Floor;
+    	Map.Instance.tiles[(int)enemy.transform.position.x][(int)enemy.transform.position.y] = Map.TileType.Floor;
     }
 
     bool checkPlayerSees()
     {
-    	if(Player.transform.position.x < transform.position.x + 3 && 
-    	   Player.transform.position.x > transform.position.x - 3 &&
-    	   Player.transform.position.y < transform.position.y + 3 &&
-    	   Player.transform.position.y > transform.position.y - 3)
+    	if(Player.Instance.transform.position.x < transform.position.x + 3 && 
+    	   Player.Instance.transform.position.x > transform.position.x - 3 &&
+    	   Player.Instance.transform.position.y < transform.position.y + 3 &&
+    	   Player.Instance.transform.position.y > transform.position.y - 3)
     		return true;
     	else 
     		return false;
@@ -78,14 +77,14 @@ public class Enemy : MonoBehaviour
 
     bool CheckPlayerNearby()
     {
-    	if((Player.stepPoint.x == transform.position.x + 1 && Player.stepPoint.y == transform.position.y + 1) ||
-    	   (Player.stepPoint.x == transform.position.x + 1 && Player.stepPoint.y == transform.position.y - 1) ||
-    	   (Player.stepPoint.x == transform.position.x + 1 && Player.stepPoint.y == transform.position.y) ||
-    	   (Player.stepPoint.x == transform.position.x - 1 && Player.stepPoint.y == transform.position.y + 1) ||
-    	   (Player.stepPoint.x == transform.position.x - 1 && Player.stepPoint.y == transform.position.y - 1) ||
-    	   (Player.stepPoint.x == transform.position.x - 1 && Player.stepPoint.y == transform.position.y) ||
-    	   (Player.stepPoint.x == transform.position.x && Player.stepPoint.y == transform.position.y + 1) ||
-    	   (Player.stepPoint.x == transform.position.x && Player.stepPoint.y == transform.position.y - 1))
+    	if((Player.Instance.stepPoint.x == transform.position.x + 1 && Player.Instance.stepPoint.y == transform.position.y + 1) ||
+    	   (Player.Instance.stepPoint.x == transform.position.x + 1 && Player.Instance.stepPoint.y == transform.position.y - 1) ||
+    	   (Player.Instance.stepPoint.x == transform.position.x + 1 && Player.Instance.stepPoint.y == transform.position.y) ||
+    	   (Player.Instance.stepPoint.x == transform.position.x - 1 && Player.Instance.stepPoint.y == transform.position.y + 1) ||
+    	   (Player.Instance.stepPoint.x == transform.position.x - 1 && Player.Instance.stepPoint.y == transform.position.y - 1) ||
+    	   (Player.Instance.stepPoint.x == transform.position.x - 1 && Player.Instance.stepPoint.y == transform.position.y) ||
+    	   (Player.Instance.stepPoint.x == transform.position.x && Player.Instance.stepPoint.y == transform.position.y + 1) ||
+    	   (Player.Instance.stepPoint.x == transform.position.x && Player.Instance.stepPoint.y == transform.position.y - 1))
     		return true;
     	else
     		return false;
@@ -105,7 +104,7 @@ public class Enemy : MonoBehaviour
     {
     	if(isPunch)
     	{
-    		Player.GetDamage(1);
+    		Player.Instance.GetDamage(1);
     		isPunch = false;;
     	}
     }
@@ -114,12 +113,12 @@ public class Enemy : MonoBehaviour
     {
         int x, y,step=0;
         int stepX = 0, stepY = 0;
-        int[,] cMap = new int[Map.MapColumns, Map.MapRows];
+        int[,] cMap = new int[Map.Instance.MapColumns, Map.Instance.MapRows];
 
-        for (x = 0; x < Map.MapColumns; x++)
-            for (y = 0; y < Map.MapRows; y++)
+        for (x = 0; x < Map.Instance.MapColumns; x++)
+            for (y = 0; y < Map.Instance.MapRows; y++)
             {
-                if (Map.tiles[x][y] != Map.TileType.Floor && Map.tiles[x][y] != Map.TileType.CorridorFloor && Map.tiles[x][y] != Map.TileType.End)
+                if (Map.Instance.tiles[x][y] != Map.TileType.Floor && Map.Instance.tiles[x][y] != Map.TileType.CorridorFloor && Map.Instance.tiles[x][y] != Map.TileType.End)
                     cMap[x, y] = -2;
                 else
                     cMap[x, y] = -1;
@@ -148,11 +147,11 @@ public class Enemy : MonoBehaviour
 							if (cMap[x, y - 1] == -1)
                                 cMap[x, y - 1] = step + 1;
 						
-                        if (x + 1 < Map.MapColumns)
+                        if (x + 1 < Map.Instance.MapColumns)
 							if (cMap[x + 1, y] == -1)
                                 cMap[x + 1, y] = step + 1;
 						
-                        if (y + 1 < Map.MapRows)
+                        if (y + 1 < Map.Instance.MapRows)
 							if (cMap[x, y + 1] == -1)
                                 cMap[x, y + 1] = step + 1;
                     }
@@ -189,7 +188,7 @@ public class Enemy : MonoBehaviour
 				return (stepX,stepY);
 			}
 				
-		if (x + 1 < Map.MapRows)
+		if (x + 1 < Map.Instance.MapRows)
 			if (cMap[x + 1, y] < step && cMap[x + 1, y] >= 0)
 			{
 				step = cMap[x + 1, y];
@@ -198,7 +197,7 @@ public class Enemy : MonoBehaviour
 				return (stepX,stepY);
 			}
 				
-		if (y + 1 < Map.MapColumns )
+		if (y + 1 < Map.Instance.MapColumns )
 			if (cMap[x, y + 1] < step && cMap[x, y + 1] >= 0)
 			{
 				step = cMap[x, y + 1];

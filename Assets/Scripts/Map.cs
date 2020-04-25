@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Rogue;
 
-public class Map : MonoBehaviour
+public class Map : Singleton<Map>
 {
 
     public enum TileType 
@@ -25,7 +26,6 @@ public class Map : MonoBehaviour
     private Room[] rooms; 
     private Corridor[] corridors;
     private Room EndingRoom;
-    private ButtonCreator Btn;
 
     public GameObject[] enemies;
     public TileType[][] tiles;
