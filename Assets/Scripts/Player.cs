@@ -7,20 +7,20 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 {
     public float speed;
     public int stepCount;
-    int lifes = 50;
 
-    public Vector3 stepPoint;
     Vector2 point;
-
+    public Vector3 stepPoint;
+   
     public bool isAnimation = false;
     public bool isMoving = false;
+    bool isDeath = false;
 
     public Sprite[] sprites = new Sprite[4];
     private Camera cam;
     Animation anim;
-    
 
-
+    public AudioClip PunchSound;
+    public AudioClip getDamage;
 
     public void OnPointerDown(PointerEventData eventData) //вызывается когда мышь нажата 
     { 
@@ -35,7 +35,6 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     void Start()
     {
-        Application.targetFrameRate = 60;
         anim = gameObject.GetComponent<Animation>();
         cam = Camera.main;
         stepPoint = transform.position;
@@ -43,7 +42,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     void Update()
     {   
-        if (isMoving)
+        if (isMoving && !isDeath)
         {
             Move();  
         }
@@ -52,24 +51,24 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     void Move()
     {
         float step = speed * Time.deltaTime;
-        
+
         if(transform.position == stepPoint && !isAnimation)
         {
-            for(int i = 0; i < Map.Instance.enemies.Length; i++)
+            for(int i = 0; i < Generator.Instance.enemies.Length; i++)
             {
-                Enemy enemy = Map.Instance.enemies[i].GetComponent<Enemy>();
+                Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>();
                 enemy.isPunch = true;
             }
             (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y); 
         }
 
-        if(Map.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Map.TileType.Enemy)
+        if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Enemy)
         {
             HitEnemy((int)stepPoint.x, (int)stepPoint.y);
             stepPoint = transform.position;
             isMoving = false;
         }
-        else if(Map.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Map.TileType.Wall || Map.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Map.TileType.Object)
+        else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Wall || Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Object)
         {        
             stepPoint = transform.position;
             isMoving = false;
@@ -89,13 +88,14 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     void HitEnemy(int x, int y)
     {
-        for(int i = 0; i < Map.Instance.enemies.Length; i++)
+        for(int i = 0; i < Generator.Instance.enemies.Length; i++)
         {
-            Enemy enemy = Map.Instance.enemies[i].GetComponent<Enemy>();
+            Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>();
             enemy.isPunch = true;
             enemy.isStep = true;
-            if(x == Map.Instance.enemies[i].transform.position.x && y == Map.Instance.enemies[i].transform.position.y)
+            if(x == Generator.Instance.enemies[i].transform.position.x && y == Generator.Instance.enemies[i].transform.position.y)
             {
+                AudioManager.Instance.PlayEffects(PunchSound);
                 ChangeSprite();
                 enemy.getDamage(1);
             }
@@ -105,28 +105,35 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public void GetDamage(int l)
     {
         anim.Play("GetDamage");
-        lifes -= l;
+        GameManager.Instance.PlayerLifes -= l;
+        AudioManager.Instance.PlayEffects(getDamage);
+        if(GameManager.Instance.PlayerLifes <= 0)
+        {
+            anim.Play("Death");
+            GameManager.Instance.GameOver();
+            isDeath = true;
+        }
     }
 
     (int a, int b) FindPlace(int x, int y, int sx, int sy)
     {
         if((sx == x - 1 && sy == y) || (sx == x + 1 && sy == y) || (sx == x && sy == y - 1) || (sx == x && sy == y + 1))
             return (x,y);
-        if((Map.Instance.tiles[x+1][y]==Map.TileType.Floor || Map.Instance.tiles[x+1][y]==Map.TileType.CorridorFloor) && sx>x)
+        if((Generator.Instance.tiles[x+1][y]==Generator.TileType.Floor || Generator.Instance.tiles[x+1][y]==Generator.TileType.CorridorFloor) && sx>x)
             return (x+1,y);
-        if((Map.Instance.tiles[x-1][y]==Map.TileType.Floor || Map.Instance.tiles[x-1][y]==Map.TileType.CorridorFloor) && sx<x)
+        if((Generator.Instance.tiles[x-1][y]==Generator.TileType.Floor || Generator.Instance.tiles[x-1][y]==Generator.TileType.CorridorFloor) && sx<x)
             return (x-1,y);
-        if((Map.Instance.tiles[x][y+1]==Map.TileType.Floor || Map.Instance.tiles[x][y+1]==Map.TileType.CorridorFloor) && sy>y)
+        if((Generator.Instance.tiles[x][y+1]==Generator.TileType.Floor || Generator.Instance.tiles[x][y+1]==Generator.TileType.CorridorFloor) && sy>y)
             return (x,y+1);
-        if((Map.Instance.tiles[x][y-1]==Map.TileType.Floor || Map.Instance.tiles[x][y-1]==Map.TileType.CorridorFloor) && sy<y)
+        if((Generator.Instance.tiles[x][y-1]==Generator.TileType.Floor || Generator.Instance.tiles[x][y-1]==Generator.TileType.CorridorFloor) && sy<y)
             return (x,y-1);
-        if(Map.Instance.tiles[x+1][y]==Map.TileType.Floor || Map.Instance.tiles[x+1][y]==Map.TileType.CorridorFloor)
+        if(Generator.Instance.tiles[x+1][y]==Generator.TileType.Floor || Generator.Instance.tiles[x+1][y]==Generator.TileType.CorridorFloor)
             return (x+1,y);
-        if(Map.Instance.tiles[x-1][y]==Map.TileType.Floor || Map.Instance.tiles[x-1][y]==Map.TileType.CorridorFloor)
+        if(Generator.Instance.tiles[x-1][y]==Generator.TileType.Floor || Generator.Instance.tiles[x-1][y]==Generator.TileType.CorridorFloor)
             return (x-1,y);
-        if(Map.Instance.tiles[x][y+1]==Map.TileType.Floor || Map.Instance.tiles[x][y+1]==Map.TileType.CorridorFloor)
+        if(Generator.Instance.tiles[x][y+1]==Generator.TileType.Floor || Generator.Instance.tiles[x][y+1]==Generator.TileType.CorridorFloor)
             return (x,y+1);
-        if(Map.Instance.tiles[x][y-1]==Map.TileType.Floor || Map.Instance.tiles[x][y-1]==Map.TileType.CorridorFloor)
+        if(Generator.Instance.tiles[x][y-1]==Generator.TileType.Floor || Generator.Instance.tiles[x][y-1]==Generator.TileType.CorridorFloor)
             return (x,y-1);
         return((int)transform.position.x, (int)transform.position.y);
     }
@@ -157,14 +164,14 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     {
         int x, y,step=0;
         int stepX = 0, stepY = 0;
-        int[,] cMap = new int[Map.Instance.MapColumns, Map.Instance.MapRows];
+        int[,] cMap = new int[Generator.Instance.MapColumns, Generator.Instance.MapRows];
 
-        for (x = 0; x < Map.Instance.MapColumns; x++) //заполнение массива числами
-            for (y = 0; y < Map.Instance.MapRows; y++)
+        for (x = 0; x < Generator.Instance.MapColumns; x++) //заполнение массива числами
+            for (y = 0; y < Generator.Instance.MapRows; y++)
             {
-                if (Map.Instance.tiles[x][y] != Map.TileType.Floor && 
-                    Map.Instance.tiles[x][y] != Map.TileType.CorridorFloor && 
-                    Map.Instance.tiles[x][y] != Map.TileType.End)
+                if (Generator.Instance.tiles[x][y] != Generator.TileType.Floor && 
+                    Generator.Instance.tiles[x][y] != Generator.TileType.CorridorFloor && 
+                    Generator.Instance.tiles[x][y] != Generator.TileType.End)
                     cMap[x, y] = -2; //есть препятствие
                 else
                     cMap[x, y] = -1; //путь свободен
@@ -194,11 +201,11 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
                             if (cMap[x, y - 1] == -1)
                                 cMap[x, y - 1] = step + 1;
                         
-                            if (x + 1 < Map.Instance.MapColumns)
+                            if (x + 1 < Generator.Instance.MapColumns)
                             if (cMap[x + 1, y] == -1)
                                 cMap[x + 1, y] = step + 1;
 
-                            if (y + 1 < Map.Instance.MapRows)
+                            if (y + 1 < Generator.Instance.MapRows)
                             if (cMap[x, y + 1] == -1)
                                 cMap[x, y + 1] = step + 1;
                     }
@@ -232,7 +239,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
                 stepY = y - 1;
                 return (stepX,stepY);
             }      
-        if (x + 1 < Map.Instance.MapRows)
+        if (x + 1 < Generator.Instance.MapRows)
             if (cMap[x + 1, y] < step && cMap[x + 1, y] >= 0)
             {
                 step = cMap[x + 1, y];
@@ -240,7 +247,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
                 stepY = y;
                 return (stepX,stepY);
             }                
-        if (y + 1 < Map.Instance.MapColumns )
+        if (y + 1 < Generator.Instance.MapColumns )
             if (cMap[x, y + 1] < step && cMap[x, y + 1] >= 0)
             {
                 step = cMap[x, y + 1];

@@ -1,34 +1,37 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
+using Rogue;
 
-public class AudioManager: MonoBehaviour 
+public class AudioManager : Singleton<AudioManager>
 {
-    public static AudioManager instance = null; 
-    public static bool music = true; 
-    public static bool sounds = true;
-
-    void Start () 
-    {
-		if (instance == null) 
-	    	instance = this; 
-		else if(instance == this) 
-	    	Destroy(gameObject); 
-	
-		DontDestroyOnLoad(gameObject);
-
-		InitializeManager();
+    public GameObject uiSource;
+    public GameObject effectsSource;                    
+    public GameObject musicSource;                                  
+        
+    public void PlayEffects(AudioClip clip)
+    { 
+        GameObject sound = (GameObject)Instantiate(effectsSource);
+        sound.transform.parent = transform;
+        AudioSource soundSource = sound.GetComponent<AudioSource>();
+        soundSource.clip = clip;
+        soundSource.Play();
     }
 
-    private void InitializeManager()
-    {
-        music = System.Convert.ToBoolean (PlayerPrefs.GetString ("music", "true"));
-		sounds = System.Convert.ToBoolean (PlayerPrefs.GetString ("sounds", "true"));
+    public void PlayUi(AudioClip clip)
+    { 
+        GameObject sound = (GameObject)Instantiate(musicSource);
+        sound.transform.parent = transform;
+        AudioSource soundSource = sound.GetComponent<AudioSource>();
+        soundSource.clip = clip;
+        soundSource.Play();
     }
 
-    public static void saveSettings(){
-		PlayerPrefs.SetString ("music", music.ToString ());
-		PlayerPrefs.SetString ("sounds", sounds.ToString ()); 
-		PlayerPrefs.Save(); 
+    public void PlayMusic(AudioClip clip)
+    { 
+        GameObject sound = (GameObject)Instantiate(musicSource);
+        sound.transform.parent = transform;
+        AudioSource soundSource = sound.GetComponent<AudioSource>();
+        soundSource.clip = clip;
+        soundSource.Play();
     }
 }

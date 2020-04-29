@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Rogue;
 
-public class CameraMove : MonoBehaviour
+public class CameraMove : Singleton<CameraMove>
 {
     private bool drag = false;
     private bool zoom = false;

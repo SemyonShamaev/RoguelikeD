@@ -51,8 +51,8 @@ public class Enemy : MonoBehaviour
        		    stepPoint = transform.position;
        		else
        		{
-       		  	Map.Instance.tiles[(int)transform.position.x][(int)transform.position.y] = Map.TileType.Floor;
-       		    Map.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] = Map.TileType.Enemy;	
+       		  	Generator.Instance.tiles[(int)transform.position.x][(int)transform.position.y] = Generator.TileType.Floor;
+       		    Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] = Generator.TileType.Enemy;	
        		}	   
 		}
 		isStep = false;
@@ -61,7 +61,7 @@ public class Enemy : MonoBehaviour
     void Death()
     {
     	enemy.SetActive(false); 
-    	Map.Instance.tiles[(int)enemy.transform.position.x][(int)enemy.transform.position.y] = Map.TileType.Floor;
+    	Generator.Instance.tiles[(int)enemy.transform.position.x][(int)enemy.transform.position.y] = Generator.TileType.Floor;
     }
 
     bool checkPlayerSees()
@@ -113,12 +113,12 @@ public class Enemy : MonoBehaviour
     {
         int x, y,step=0;
         int stepX = 0, stepY = 0;
-        int[,] cMap = new int[Map.Instance.MapColumns, Map.Instance.MapRows];
+        int[,] cMap = new int[Generator.Instance.MapColumns, Generator.Instance.MapRows];
 
-        for (x = 0; x < Map.Instance.MapColumns; x++)
-            for (y = 0; y < Map.Instance.MapRows; y++)
+        for (x = 0; x < Generator.Instance.MapColumns; x++)
+            for (y = 0; y < Generator.Instance.MapRows; y++)
             {
-                if (Map.Instance.tiles[x][y] != Map.TileType.Floor && Map.Instance.tiles[x][y] != Map.TileType.CorridorFloor && Map.Instance.tiles[x][y] != Map.TileType.End)
+                if (Generator.Instance.tiles[x][y] != Generator.TileType.Floor && Generator.Instance.tiles[x][y] != Generator.TileType.CorridorFloor && Generator.Instance.tiles[x][y] != Generator.TileType.End)
                     cMap[x, y] = -2;
                 else
                     cMap[x, y] = -1;
@@ -147,11 +147,11 @@ public class Enemy : MonoBehaviour
 							if (cMap[x, y - 1] == -1)
                                 cMap[x, y - 1] = step + 1;
 						
-                        if (x + 1 < Map.Instance.MapColumns)
+                        if (x + 1 < Generator.Instance.MapColumns)
 							if (cMap[x + 1, y] == -1)
                                 cMap[x + 1, y] = step + 1;
 						
-                        if (y + 1 < Map.Instance.MapRows)
+                        if (y + 1 < Generator.Instance.MapRows)
 							if (cMap[x, y + 1] == -1)
                                 cMap[x, y + 1] = step + 1;
                     }
@@ -188,7 +188,7 @@ public class Enemy : MonoBehaviour
 				return (stepX,stepY);
 			}
 				
-		if (x + 1 < Map.Instance.MapRows)
+		if (x + 1 < Generator.Instance.MapRows)
 			if (cMap[x + 1, y] < step && cMap[x + 1, y] >= 0)
 			{
 				step = cMap[x + 1, y];
@@ -197,7 +197,7 @@ public class Enemy : MonoBehaviour
 				return (stepX,stepY);
 			}
 				
-		if (y + 1 < Map.Instance.MapColumns )
+		if (y + 1 < Generator.Instance.MapColumns )
 			if (cMap[x, y + 1] < step && cMap[x, y + 1] >= 0)
 			{
 				step = cMap[x, y + 1];
