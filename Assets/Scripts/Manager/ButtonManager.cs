@@ -6,6 +6,7 @@ using Rogue;
 
 public class ButtonManager : Singleton<ButtonManager>
 {
+
     public void YesBtn()
     {
     	GameManager.Instance.ToNewLevel();
@@ -23,6 +24,27 @@ public class ButtonManager : Singleton<ButtonManager>
 
     public void ReturnMenuButton()
     {
-    	SceneManager.LoadScene ("MainMenu");
+    	SceneManager.LoadScene("MainMenu");
+    	AudioManager.Instance.RestoreMusic();
+    }
+
+    public void PauseButton()
+    {
+    	GameManager.Instance.PauseGame();
+    }
+
+    public void SettingsButton()
+    {
+
+    }
+
+    public void NextButton()
+    {
+    	GameManager.Instance.NextGame();
+    }
+
+    public void ExitButton()
+    {
+    	GameManager.Instance.ExitGame();
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using Rogue;
 
 public class GameManager : Singleton<GameManager>
@@ -10,26 +11,37 @@ public class GameManager : Singleton<GameManager>
 	public int PlayerFoodPoints;
    	public int level = 1;
 
-   	private Generator Generator;	
-
-   	public GameObject GameOverPicture;
-   	public GameObject ReButton;
-   	public GameObject ReturnMenuButton;
-   	public GameObject YesButton;
-   	public GameObject NoButton;
    	public GameObject Canvas;
 
-   	private GameObject YesBtn;
-   	private GameObject NoBtn;
-   	Animation TransitionAnim;
+   	public GameObject PauseButton;
 
-   	void Start()
-   	{		
+   	public GameObject PausePanel;
+   	public GameObject GameOverPanel;
+   	public GameObject NextLevelPanel;
 
-   	}
+	public AudioClip BackgroundMusic;
+	public AudioClip DeathSound;
+
+	public bool onPause = false;
+
+	private Generator Generator;	
+
+	private GameObject PausePnl;
+	private GameObject NextLevelPnl;
+
+	Animation TransitionAnim;
+
    	void Awake()
    	{
+   		AudioManager.Instance.RestoreMusic();
+   		AudioManager.Instance.PlayMusic(BackgroundMusic);
+
+   		GameObject PauseBtn = Instantiate(PauseButton, new Vector3(850, 1600,0), Quaternion.identity) as GameObject;
+    	PauseBtn.transform.SetParent(Canvas.transform, false);
+    	PauseBtn.transform.SetAsLastSibling();
+   		
    		Generator = GetComponent<Generator>();
+   		
    		InitGame();
    	}
 
@@ -45,21 +57,42 @@ public class GameManager : Singleton<GameManager>
 
 	public void NewLevelMessage()
 	{
-		YesBtn = Instantiate(YesButton, new Vector3(-200,-700,0), Quaternion.identity) as GameObject;
-    	YesBtn.transform.SetParent(Canvas.transform, false);
-    	NoBtn = Instantiate(NoButton, new Vector3(200,-700,0), Quaternion.identity) as GameObject;
-    	NoBtn.transform.SetParent(Canvas.transform, false);
+		NextLevelPnl = Instantiate(NextLevelPanel, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+    	NextLevelPnl.transform.SetParent(Canvas.transform, false);
 	}
+
+	public void PauseGame()
+	{
+		if(PausePnl == null)
+		{
+			onPause = true;
+			Time.timeScale = 0;
+
+			PausePnl = Instantiate(PausePanel, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+    		PausePnl.transform.SetParent(Canvas.transform, false);
+    	}
+	}
+
+	public void ExitGame()
+	{
+		Application.Quit();
+	}
+
+	public void NextGame()
+	{
+		Destroy(PausePnl);
+		onPause = false;
+		Time.timeScale = 1;
+	}
+
 	public void DestroyBtn()
 	{
-		Destroy(YesBtn);
-		Destroy(NoBtn);
+		Destroy(NextLevelPnl);
 	}
 
 	public void ToNewLevel()
 	{
 		TransitionAnim = GameObject.Find("Panel").GetComponent<Animation>();
-   		TransitionAnim["Transition"].layer = 123;
 		TransitionAnim.Play("Transition");
 
 		DestroyBtn();
@@ -72,16 +105,12 @@ public class GameManager : Singleton<GameManager>
 		Camera.main.transform.position = new Vector3(100, 100, -5);	
 	}
 
-
 	public void GameOver()
 	{
-		GameObject GameOver = Instantiate(GameOverPicture);
-		GameOver.transform.parent = Player.Instance.transform;
-		GameOver.transform.position = Player.Instance.transform.position;
+		AudioManager.Instance.PauseMusic();
+		AudioManager.Instance.PlayEffects(DeathSound);
 
-		GameObject ReBtn = Instantiate(ReButton, new Vector3(400,-700,0), Quaternion.identity) as GameObject;
-    	ReBtn.transform.SetParent(Canvas.transform, false);
-    	GameObject ReturnMenuBtn = Instantiate(ReturnMenuButton, new Vector3(-400,-700,0), Quaternion.identity) as GameObject;
-    	ReturnMenuBtn.transform.SetParent(Canvas.transform, false);
+		GameObject GameOverPnl = Instantiate(GameOverPanel, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+    	GameOverPnl.transform.SetParent(Canvas.transform, false);
 	}
 }

@@ -2,22 +2,24 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-	public GameObject enemy;
-	public float speed;
 	public int lifes;
+	public float speed;
+
+	public GameObject enemy;
+	public GameObject[] drops;
+	
 	public bool isPunch;
 	public bool isStep = false;
-	Vector3 stepPoint;
-	Vector3 playerPosition;
+	
+	private Vector3 stepPoint;
+	private Vector3 playerPosition;
 
-	public GameObject[] drops;
-
-	Animation anim;
+	private	Animation anim;
 
 	void Start()
 	{
 		anim = gameObject.GetComponent<Animation>();
-		anim["GetDamage"].layer = 123;
+		stepPoint = transform.position;
 	}
 
     void Update()
@@ -35,11 +37,6 @@ public class Enemy : MonoBehaviour
     	transform.position = Vector2.MoveTowards(transform.position, stepPoint, step); 	
     }
 
-    void Awake()
-    {
-    	stepPoint = transform.position;
-    }
-
     void Move()
     {
     	if(transform.position == stepPoint)
@@ -55,6 +52,7 @@ public class Enemy : MonoBehaviour
        		    Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] = Generator.TileType.Enemy;	
        		}	   
 		}
+
 		isStep = false;
     }
 
@@ -88,16 +86,6 @@ public class Enemy : MonoBehaviour
     		return true;
     	else
     		return false;
-    }
-
-    void startAnimation()
-    {
-
-    }
-
-    void endAnimation()
-    {
-
     }
 
     void Punch()
@@ -208,11 +196,21 @@ public class Enemy : MonoBehaviour
         return (startX,startY);
     }
 
-
     public void getDamage(int l)
     {
     	anim.Play("GetDamage");
     	lifes -= l;
     }
+
+    void startAnimation()
+    {
+
+    }
+
+    void endAnimation()
+    {
+
+    }
 }
 
+	

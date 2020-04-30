@@ -8,36 +8,41 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public float speed;
     public int stepCount;
 
-    Vector2 point;
+    public Vector2 point;
     public Vector3 stepPoint;
    
-    public bool isAnimation = false;
     public bool isMoving = false;
-    bool isDeath = false;
-
-    public Sprite[] sprites = new Sprite[4];
-    private Camera cam;
-    Animation anim;
+    public bool isAnimation = false;
 
     public AudioClip PunchSound;
     public AudioClip getDamage;
 
-    public void OnPointerDown(PointerEventData eventData) //вызывается когда мышь нажата 
+    public Sprite[] sprites = new Sprite[4];
+
+    private Camera cam;
+    private Animation anim;
+    private bool isDeath = false;
+    
+    public void OnPointerDown(PointerEventData eventData) 
     { 
 
     } 
-    public void OnPointerUp(PointerEventData eventData) //вызывается когда мышь отпущена
+
+    public void OnPointerUp(PointerEventData eventData)
     {   
-        point = cam.ScreenToWorldPoint(new Vector3((int)Mathf.Round(eventData.position.x), (int)Mathf.Round(eventData.position.y), 0)); //из локальных координат в мировые
-        point = new Vector2((int)Mathf.Round(point.x), (int)Mathf.Round(point.y));
-        isMoving = true; //запуск движения`
+        if(!GameManager.Instance.onPause)
+        {
+            point = cam.ScreenToWorldPoint(new Vector3((int)Mathf.Round(eventData.position.x), (int)Mathf.Round(eventData.position.y), 0)); 
+            point = new Vector2((int)Mathf.Round(point.x), (int)Mathf.Round(point.y));
+            isMoving = true; 
+        }    
     }
 
     void Start()
     {
-        anim = gameObject.GetComponent<Animation>();
         cam = Camera.main;
         stepPoint = transform.position;
+        anim = gameObject.GetComponent<Animation>();   
     }
 
     void Update()
@@ -59,19 +64,21 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
                 Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>();
                 enemy.isPunch = true;
             }
+
             (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y); 
         }
 
         if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Enemy)
         {
+            isMoving = false;
             HitEnemy((int)stepPoint.x, (int)stepPoint.y);
             stepPoint = transform.position;
-            isMoving = false;
         }
+
         else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Wall || Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Object)
         {        
-            stepPoint = transform.position;
             isMoving = false;
+            stepPoint = transform.position;
         }
 
         else if (transform.position.x == (int)point.x && transform.position.y == (int)point.y)
@@ -82,7 +89,6 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             ChangeSprite();
             transform.position = Vector2.MoveTowards(transform.position, stepPoint, step);  
             cam.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
-  
         }  
     }
 
@@ -91,13 +97,15 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         for(int i = 0; i < Generator.Instance.enemies.Length; i++)
         {
             Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>();
-            enemy.isPunch = true;
             enemy.isStep = true;
-            if(x == Generator.Instance.enemies[i].transform.position.x && y == Generator.Instance.enemies[i].transform.position.y)
+            enemy.isPunch = true;
+
+            if(x == Generator.Instance.enemies[i].transform.position.x && 
+                y == Generator.Instance.enemies[i].transform.position.y)
             {
-                AudioManager.Instance.PlayEffects(PunchSound);
                 ChangeSprite();
                 enemy.getDamage(1);
+                AudioManager.Instance.PlayEffects(PunchSound);
             }
         }
     }
@@ -107,11 +115,12 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         anim.Play("GetDamage");
         GameManager.Instance.PlayerLifes -= l;
         AudioManager.Instance.PlayEffects(getDamage);
+        
         if(GameManager.Instance.PlayerLifes <= 0)
         {
+            isDeath = true;
             anim.Play("Death");
             GameManager.Instance.GameOver();
-            isDeath = true;
         }
     }
 

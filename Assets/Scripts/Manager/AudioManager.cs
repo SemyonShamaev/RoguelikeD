@@ -14,12 +14,13 @@ public class AudioManager : Singleton<AudioManager>
         sound.transform.parent = transform;
         AudioSource soundSource = sound.GetComponent<AudioSource>();
         soundSource.clip = clip;
+        soundSource.ignoreListenerPause = true;
         soundSource.Play();
     }
 
     public void PlayUi(AudioClip clip)
     { 
-        GameObject sound = (GameObject)Instantiate(musicSource);
+        GameObject sound = (GameObject)Instantiate(uiSource);
         sound.transform.parent = transform;
         AudioSource soundSource = sound.GetComponent<AudioSource>();
         soundSource.clip = clip;
@@ -34,4 +35,15 @@ public class AudioManager : Singleton<AudioManager>
         soundSource.clip = clip;
         soundSource.Play();
     }
+
+    public void PauseMusic()
+    {
+        AudioListener.pause = true;
+    }
+
+    public void RestoreMusic()
+    {
+        AudioListener.pause = false;
+    }
+
 }

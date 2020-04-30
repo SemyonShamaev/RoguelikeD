@@ -5,35 +5,35 @@ using Rogue;
 
 public class Generator : Singleton<Generator>
 {
-
     public enum TileType 
     {
         Empty, Wall, Floor, CorridorFloor, End, Start, Object, Enemy
     }
 
-    public int MapColumns; 
     public int MapRows; 
+    public int MapColumns; 
     public int roomWidth; 
     public int roomHeight; 
     public int corridorLength; 
 
-    public GameObject[] floorTiles; 
+    public GameObject[] endTiles; 
     public GameObject[] wallTiles; 
-    public GameObject[] containersTiles;
-    public GameObject[] endTiles;
     public GameObject[] enemyTiles;
+    public GameObject[] floorTiles;
+    public GameObject[] containersTiles;
+
+    public GameObject[] enemies;
+    public TileType[][] tiles;
+    
+    public bool isEnd = true;
 
     private Room[] rooms; 
     private Corridor[] corridors;
     private Room EndingRoom;
 
-    public GameObject[] enemies;
-    public TileType[][] tiles;
-
     private List<Vector3> gridPositions = new List<Vector3>();
     private List<Vector3> enemyPositions = new List<Vector3>();
     private Vector3 endPosition;
-    public bool isEnd = true;
 
     void Update()
     {
@@ -42,6 +42,7 @@ public class Generator : Singleton<Generator>
             GameManager.Instance.NewLevelMessage();
             isEnd = false;
         }
+
         if(Player.Instance.transform.position != endPosition && !isEnd)
             isEnd = true;
     }
@@ -49,12 +50,13 @@ public class Generator : Singleton<Generator>
     public void setupScene(int l)
     {
         gridPositions.Clear();
-        enemyPositions.Clear();;
+        enemyPositions.Clear();
+
         rooms = null;
-        enemies = null;
         tiles = null;
         isEnd = true;
-  
+        enemies = null;
+
         addTilesMap();
         addRoomsAndCorridors();
         addInstance();
@@ -74,6 +76,7 @@ public class Generator : Singleton<Generator>
     void addTilesMap()
     {
         tiles = new TileType[MapColumns][];
+
         for (int i = 0; i < tiles.Length; i++)
         {
             tiles[i] = new TileType[MapRows];
@@ -305,4 +308,3 @@ public class Generator : Singleton<Generator>
         return 0;
     }
 }
-
