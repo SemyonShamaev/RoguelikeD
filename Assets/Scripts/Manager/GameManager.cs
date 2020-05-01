@@ -13,11 +13,12 @@ public class GameManager : Singleton<GameManager>
 
    	public GameObject Canvas;
 
-   	public GameObject PauseButton;
-
-   	public GameObject PausePanel;
    	public GameObject GameOverPanel;
+
    	public GameObject NextLevelPanel;
+   	public GameObject PausePanel;
+   	public GameObject SettingsPanel;
+   	public Text levelCount;
 
 	public AudioClip BackgroundMusic;
 	public AudioClip DeathSound;
@@ -26,20 +27,15 @@ public class GameManager : Singleton<GameManager>
 
 	private Generator Generator;	
 
-	private GameObject PausePnl;
-	private GameObject NextLevelPnl;
-
 	Animation TransitionAnim;
 
    	void Awake()
    	{
+   		Time.timeScale = 1;
+   		
    		AudioManager.Instance.RestoreMusic();
    		AudioManager.Instance.PlayMusic(BackgroundMusic);
 
-   		GameObject PauseBtn = Instantiate(PauseButton, new Vector3(850, 1600,0), Quaternion.identity) as GameObject;
-    	PauseBtn.transform.SetParent(Canvas.transform, false);
-    	PauseBtn.transform.SetAsLastSibling();
-   		
    		Generator = GetComponent<Generator>();
    		
    		InitGame();
@@ -57,19 +53,18 @@ public class GameManager : Singleton<GameManager>
 
 	public void NewLevelMessage()
 	{
-		NextLevelPnl = Instantiate(NextLevelPanel, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
-    	NextLevelPnl.transform.SetParent(Canvas.transform, false);
+		NextLevelPanel.SetActive(true);
 	}
 
 	public void PauseGame()
 	{
-		if(PausePnl == null)
+		if(PausePanel.activeInHierarchy == false)
 		{
+			Debug.Log("fdf");
 			onPause = true;
 			Time.timeScale = 0;
 
-			PausePnl = Instantiate(PausePanel, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
-    		PausePnl.transform.SetParent(Canvas.transform, false);
+			PausePanel.SetActive(true);
     	}
 	}
 
@@ -80,14 +75,21 @@ public class GameManager : Singleton<GameManager>
 
 	public void NextGame()
 	{
-		Destroy(PausePnl);
+		PausePanel.SetActive(false);
+		SettingsPanel.SetActive(false);
 		onPause = false;
 		Time.timeScale = 1;
 	}
 
 	public void DestroyBtn()
 	{
-		Destroy(NextLevelPnl);
+		NextLevelPanel.SetActive(false);
+	}
+
+	public void OpenSettings()
+	{
+		PausePanel.SetActive(false);
+		SettingsPanel.SetActive(true);
 	}
 
 	public void ToNewLevel()
@@ -98,6 +100,7 @@ public class GameManager : Singleton<GameManager>
 		DestroyBtn();
 		foreach (Transform child in transform) Destroy(child.gameObject);
 		level++;
+		levelCount.text = level.ToString();
 		Generator.Instance.setupScene(level);
 		
 		Player.Instance.transform.position = new Vector3(100,100,0);

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using Rogue;
 
 public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler 
@@ -16,6 +17,8 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     public AudioClip PunchSound;
     public AudioClip getDamage;
+
+    public Slider HealthBar;
 
     public Sprite[] sprites = new Sprite[4];
 
@@ -115,7 +118,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         anim.Play("GetDamage");
         GameManager.Instance.PlayerLifes -= l;
         AudioManager.Instance.PlayEffects(getDamage);
-        
+        HealthBar.value = (float)GameManager.Instance.PlayerLifes / 10;
         if(GameManager.Instance.PlayerLifes <= 0)
         {
             isDeath = true;

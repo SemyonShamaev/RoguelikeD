@@ -1,11 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Rogue;
 
 public class ButtonManager : Singleton<ButtonManager>
 {
+	public AudioMixer masterMixer;
 
     public void YesBtn()
     {
@@ -19,7 +22,7 @@ public class ButtonManager : Singleton<ButtonManager>
 
     public void StartGameBtn()
     {
-    	SceneManager.LoadScene ("Game");
+    	SceneManager.LoadScene("Game");
     }
 
     public void ReturnMenuButton()
@@ -35,7 +38,7 @@ public class ButtonManager : Singleton<ButtonManager>
 
     public void SettingsButton()
     {
-
+    	GameManager.Instance.OpenSettings();
     }
 
     public void NextButton()
@@ -46,5 +49,15 @@ public class ButtonManager : Singleton<ButtonManager>
     public void ExitButton()
     {
     	GameManager.Instance.ExitGame();
+    }
+
+    public void changeVolumeMusic(Slider slid)
+    {
+    	masterMixer.SetFloat("VolumeMusic",  Mathf.Lerp(-80, 0, slid.value));
+    }
+
+    public void changeVolumeEffects(Slider slid)
+    {
+    	masterMixer.SetFloat("VolumeEffects", Mathf.Lerp(-80, 0, slid.value));
     }
 }
