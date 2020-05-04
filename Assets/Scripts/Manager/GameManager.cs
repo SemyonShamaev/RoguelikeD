@@ -7,8 +7,6 @@ using Rogue;
 
 public class GameManager : Singleton<GameManager>
 {
-	public int PlayerLifes;
-	public int PlayerFoodPoints;
    	public int level = 1;
 
    	public GameObject Canvas;
@@ -18,6 +16,8 @@ public class GameManager : Singleton<GameManager>
    	public GameObject NextLevelPanel;
    	public GameObject PausePanel;
    	public GameObject SettingsPanel;
+   	public GameObject InventoryPlayerPanel;
+
    	public Text levelCount;
 
 	public AudioClip BackgroundMusic;
@@ -46,31 +46,29 @@ public class GameManager : Singleton<GameManager>
 		Generator.setupScene(level);
 	}
 
-	public void RestartGame()
-	{
-		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-	}
-
 	public void NewLevelMessage()
 	{
 		NextLevelPanel.SetActive(true);
+		onPause = true;
+		Time.timeScale = 0;
 	}
 
 	public void PauseGame()
 	{
-		if(PausePanel.activeInHierarchy == false)
+		if(SettingsPanel.activeSelf || PausePanel.activeSelf)
 		{
-			Debug.Log("fdf");
+			SettingsPanel.SetActive(false);
+			PausePanel.SetActive(false);
+			onPause = false;
+			Time.timeScale = 1;
+		}
+		else
+		{
+			SettingsPanel.SetActive(true);
+			PausePanel.SetActive(true);
 			onPause = true;
 			Time.timeScale = 0;
-
-			PausePanel.SetActive(true);
-    	}
-	}
-
-	public void ExitGame()
-	{
-		Application.Quit();
+		}
 	}
 
 	public void NextGame()
@@ -81,26 +79,25 @@ public class GameManager : Singleton<GameManager>
 		Time.timeScale = 1;
 	}
 
-	public void DestroyBtn()
+	public void OpenInventory()
 	{
-		NextLevelPanel.SetActive(false);
-	}
-
-	public void OpenSettings()
-	{
-		PausePanel.SetActive(false);
-		SettingsPanel.SetActive(true);
+		InventoryPlayerPanel.SetActive(!InventoryPlayerPanel.activeSelf);
 	}
 
 	public void ToNewLevel()
 	{
+		onPause = false;
+		Time.timeScale = 1;
+		
 		TransitionAnim = GameObject.Find("Panel").GetComponent<Animation>();
 		TransitionAnim.Play("Transition");
 
-		DestroyBtn();
+		NextLevelPanel.SetActive(false);
+
 		foreach (Transform child in transform) Destroy(child.gameObject);
 		level++;
 		levelCount.text = level.ToString();
+
 		Generator.Instance.setupScene(level);
 		
 		Player.Instance.transform.position = new Vector3(100,100,0);

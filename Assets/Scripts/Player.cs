@@ -19,13 +19,15 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public AudioClip getDamage;
 
     public Slider HealthBar;
-
     public Sprite[] sprites = new Sprite[4];
 
     private Camera cam;
     private Animation anim;
     private bool isDeath = false;
     
+    private float currentLifes;
+    private float maxLifes = 10;
+
     public void OnPointerDown(PointerEventData eventData) 
     { 
 
@@ -43,6 +45,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     void Start()
     {
+        currentLifes = maxLifes;
         cam = Camera.main;
         stepPoint = transform.position;
         anim = gameObject.GetComponent<Animation>();   
@@ -85,7 +88,20 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         }
 
         else if (transform.position.x == (int)point.x && transform.position.y == (int)point.y)
+        {
+            if(Generator.Instance.tiles[(int)point.x][(int)point.y] == Generator.TileType.Drop)
+            {
+                for(int i = 0; i < Generator.Instance.enemies.Length; i++)
+                {
+                    if(transform.position == Generator.Instance.enemies[i].transform.position)
+                    {
+                        Generator.Instance.Invtr[i].SetActive(true);
+                        GameManager.Instance.onPause = true;
+                    } 
+                }
+            }
             isMoving = false; 
+        }
 
         else
         {
@@ -116,10 +132,10 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public void GetDamage(int l)
     {
         anim.Play("GetDamage");
-        GameManager.Instance.PlayerLifes -= l;
+        currentLifes -= l;
         AudioManager.Instance.PlayEffects(getDamage);
-        HealthBar.value = (float)GameManager.Instance.PlayerLifes / 10;
-        if(GameManager.Instance.PlayerLifes <= 0)
+        HealthBar.value = currentLifes / maxLifes;
+        if(currentLifes <= 0)
         {
             isDeath = true;
             anim.Play("Death");
@@ -183,7 +199,8 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             {
                 if (Generator.Instance.tiles[x][y] != Generator.TileType.Floor && 
                     Generator.Instance.tiles[x][y] != Generator.TileType.CorridorFloor && 
-                    Generator.Instance.tiles[x][y] != Generator.TileType.End)
+                    Generator.Instance.tiles[x][y] != Generator.TileType.End  && 
+                    Generator.Instance.tiles[x][y] != Generator.TileType.Drop)
                     cMap[x, y] = -2; //есть препятствие
                 else
                     cMap[x, y] = -1; //путь свободен

@@ -6,7 +6,8 @@ public class Enemy : MonoBehaviour
 	public float speed;
 
 	public GameObject enemy;
-	public GameObject[] drops;
+    public GameObject drop;
+
 	
 	public bool isPunch;
 	public bool isStep = false;
@@ -24,10 +25,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-    	if(lifes <= 0)
-    		Death();
- 
- 		else if(CheckPlayerNearby())
+ 		if(CheckPlayerNearby())
  			Punch();
 
     	else if(checkPlayerSees() && (Player.Instance.isMoving || isStep))
@@ -59,7 +57,12 @@ public class Enemy : MonoBehaviour
     void Death()
     {
     	enemy.SetActive(false); 
-    	Generator.Instance.tiles[(int)enemy.transform.position.x][(int)enemy.transform.position.y] = Generator.TileType.Floor;
+        GameObject dropEnemy = Instantiate(drop, transform.position, Quaternion.identity) as GameObject;
+       
+        dropEnemy.transform.SetParent(GameManager.Instance.transform, false);
+        dropEnemy.transform.position = transform.position;
+       
+    	Generator.Instance.tiles[(int)enemy.transform.position.x][(int)enemy.transform.position.y] = Generator.TileType.Drop;
     }
 
     bool checkPlayerSees()
@@ -106,7 +109,10 @@ public class Enemy : MonoBehaviour
         for (x = 0; x < Generator.Instance.MapColumns; x++)
             for (y = 0; y < Generator.Instance.MapRows; y++)
             {
-                if (Generator.Instance.tiles[x][y] != Generator.TileType.Floor && Generator.Instance.tiles[x][y] != Generator.TileType.CorridorFloor && Generator.Instance.tiles[x][y] != Generator.TileType.End)
+                if (Generator.Instance.tiles[x][y] != Generator.TileType.Floor && 
+                    Generator.Instance.tiles[x][y] != Generator.TileType.CorridorFloor && 
+                    Generator.Instance.tiles[x][y] != Generator.TileType.End  && 
+                    Generator.Instance.tiles[x][y] != Generator.TileType.Drop)
                     cMap[x, y] = -2;
                 else
                     cMap[x, y] = -1;
@@ -200,6 +206,10 @@ public class Enemy : MonoBehaviour
     {
     	anim.Play("GetDamage");
     	lifes -= l;
+        if(lifes <= 0)
+        {
+            Death();
+        }
     }
 
     void startAnimation()

@@ -7,7 +7,7 @@ public class Generator : Singleton<Generator>
 {
     public enum TileType 
     {
-        Empty, Wall, Floor, CorridorFloor, End, Start, Object, Enemy
+        Empty, Wall, Floor, CorridorFloor, End, Start, Object, Enemy, Drop
     }
 
     public int MapRows; 
@@ -23,6 +23,9 @@ public class Generator : Singleton<Generator>
     public GameObject[] containersTiles;
 
     public GameObject[] enemies;
+    public GameObject[] Invtr;
+    public GameObject Inventory;
+
     public TileType[][] tiles;
     
     public bool isEnd = true;
@@ -55,13 +58,14 @@ public class Generator : Singleton<Generator>
         rooms = null;
         tiles = null;
         isEnd = true;
-        enemies = null;
+        //enemies = null;
+        //Invtr = null;
 
         addTilesMap();
         addRoomsAndCorridors();
         addInstance();
         addObjectsOnMap(containersTiles, 20, 30);
-        addEnemyOnMap(enemyTiles, 10, 20);
+        //addEnemyOnMap(enemyTiles, 10, 20);
 
         for (int i = 1; i < rooms.Length; i++)
         {
@@ -219,7 +223,7 @@ public class Generator : Singleton<Generator>
     void addEnemyOnMap(GameObject[] tileArray, int minimum, int maximum)
     {
         enemies = new GameObject[Random.Range(minimum, maximum + 1)]; 
-
+        Invtr = new GameObject[enemies.Length];
         for (int i = 0; i <  enemies.Length; i++)
         {
             int randomIndex = Random.Range(0, enemyPositions.Count);
@@ -229,6 +233,11 @@ public class Generator : Singleton<Generator>
             enemies[i] = Instantiate(tileChoice, randomPosition, Quaternion.identity) as GameObject;
             enemies[i].transform.parent = transform;
             tiles[Mathf.RoundToInt(enemies[i].transform.position.x)][Mathf.RoundToInt(enemies[i].transform.position.y)] = TileType.Enemy;
+
+            Invtr[i] = Instantiate(Inventory, transform.position, Quaternion.identity) as GameObject;
+            Invtr[i].transform.SetParent(GameObject.Find("Inventory").transform, false);
+            Invtr[i].transform.position = GameObject.Find("Inventory").transform.position;
+            Invtr[i].SetActive(false);
         }
     }
 

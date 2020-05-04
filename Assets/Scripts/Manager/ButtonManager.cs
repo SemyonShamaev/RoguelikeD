@@ -17,7 +17,9 @@ public class ButtonManager : Singleton<ButtonManager>
 
     public void NoBtn()
     {
-    	GameManager.Instance.DestroyBtn();
+    	GameManager.Instance.NextLevelPanel.SetActive(false);
+        GameManager.Instance.onPause = false;
+        Time.timeScale = 1;
     }
 
     public void StartGameBtn()
@@ -38,7 +40,8 @@ public class ButtonManager : Singleton<ButtonManager>
 
     public void SettingsButton()
     {
-    	GameManager.Instance.OpenSettings();
+    	GameManager.Instance.PausePanel.SetActive(false);
+        GameManager.Instance.SettingsPanel.SetActive(true);
     }
 
     public void NextButton()
@@ -46,9 +49,24 @@ public class ButtonManager : Singleton<ButtonManager>
     	GameManager.Instance.NextGame();
     }
 
+    public void RestartBtn()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
     public void ExitButton()
     {
-    	GameManager.Instance.ExitGame();
+    	Application.Quit();
+    }
+
+    public void InventoryButton()
+    {
+        GameManager.Instance.OpenInventory();
+    }
+
+    public void ExitInventoryButton()
+    {
+        GameManager.Instance.InventoryPlayerPanel.SetActive(false);
     }
 
     public void changeVolumeMusic(Slider slid)
@@ -59,5 +77,17 @@ public class ButtonManager : Singleton<ButtonManager>
     public void changeVolumeEffects(Slider slid)
     {
     	masterMixer.SetFloat("VolumeEffects", Mathf.Lerp(-80, 0, slid.value));
+    }
+
+    public void ExitEnemyInventoryButton()
+    {
+        for(int i = 0; i < Generator.Instance.enemies.Length; i++)
+        {
+            if(Player.Instance.transform.position == Generator.Instance.enemies[i].transform.position)
+            {
+                Generator.Instance.Invtr[i].SetActive(false);
+                GameManager.Instance.onPause = false;
+            } 
+        }
     }
 }
