@@ -8,8 +8,6 @@ public class Enemy : MonoBehaviour
 	public GameObject enemy;
     public GameObject drop;
 
-	
-	public bool isPunch;
 	public bool isStep = false;
 	
 	private Vector3 stepPoint;
@@ -25,11 +23,9 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
- 		if(CheckPlayerNearby())
- 			Punch();
-
-    	else if(checkPlayerSees() && (Player.Instance.isMoving || isStep))
-			Move();
+        if(isStep)
+            if(checkPlayerSees())
+                Move();
 
 		float step = speed * Time.deltaTime;
     	transform.position = Vector2.MoveTowards(transform.position, stepPoint, step); 	
@@ -38,20 +34,23 @@ public class Enemy : MonoBehaviour
     void Move()
     {
     	if(transform.position == stepPoint)
-		{
-			playerPosition = Player.Instance.stepPoint;
-       		(stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y,  (int)Mathf.Round(playerPosition.x),  (int)Mathf.Round(playerPosition.y));   
-       		    
-       		if(stepPoint == playerPosition)
-       		    stepPoint = transform.position;
-       		else
-       		{
-       		  	Generator.Instance.tiles[(int)transform.position.x][(int)transform.position.y] = Generator.TileType.Floor;
-       		    Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] = Generator.TileType.Enemy;	
-       		}	   
-		}
+        {
+            isStep = false;
+            (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)Player.Instance.transform.position.x, (int)Player.Instance.transform.position.y); 
+        }   
 
-		isStep = false;
+        if(stepPoint == Player.Instance.transform.position || stepPoint == Player.Instance.stepPoint)
+        {
+            stepPoint = transform.position;
+            Player.Instance.GetDamage(1);
+            isStep = false;
+        }
+
+        else
+        {
+            Generator.Instance.tiles[(int)transform.position.x][(int)transform.position.y] = Generator.TileType.Floor;
+            Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] = Generator.TileType.Enemy;
+        }
     }
 
     void Death()
@@ -67,10 +66,10 @@ public class Enemy : MonoBehaviour
 
     bool checkPlayerSees()
     {
-    	if(Player.Instance.transform.position.x < transform.position.x + 3 && 
-    	   Player.Instance.transform.position.x > transform.position.x - 3 &&
-    	   Player.Instance.transform.position.y < transform.position.y + 3 &&
-    	   Player.Instance.transform.position.y > transform.position.y - 3)
+    	if(Player.Instance.transform.position.x < transform.position.x + 6 && 
+    	   Player.Instance.transform.position.x > transform.position.x - 6 &&
+    	   Player.Instance.transform.position.y < transform.position.y + 6 &&
+    	   Player.Instance.transform.position.y > transform.position.y - 6)
     		return true;
     	else 
     		return false;
@@ -91,15 +90,6 @@ public class Enemy : MonoBehaviour
     		return false;
     }
 
-    void Punch()
-    {
-    	if(isPunch)
-    	{
-    		Player.Instance.GetDamage(1);
-    		isPunch = false;;
-    	}
-    }
-
     (int a, int b) FindWave(int startX, int startY, int targetX, int targetY)
     {
         int x, y,step=0;
@@ -111,8 +101,7 @@ public class Enemy : MonoBehaviour
             {
                 if (Generator.Instance.tiles[x][y] != Generator.TileType.Floor && 
                     Generator.Instance.tiles[x][y] != Generator.TileType.CorridorFloor && 
-                    Generator.Instance.tiles[x][y] != Generator.TileType.End  && 
-                    Generator.Instance.tiles[x][y] != Generator.TileType.Drop)
+                    Generator.Instance.tiles[x][y] != Generator.TileType.End)
                     cMap[x, y] = -2;
                 else
                     cMap[x, y] = -1;

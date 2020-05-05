@@ -27,15 +27,6 @@ public class InventoryEnemy : Singleton<DataBase>
 
 	public void Start()
 	{
-		if(items.Count == 0)
-		{
-			addGraphics();
-		}
-
-		for(int i = 0; i < maxCount; i++)
-		{
-			AddItem(i, DataBase.Instance.items[Random.Range(0, DataBase.Instance.items.Count)], Random.Range(1,99));
-		}
 		UpdateInventory();
 	}
 
@@ -76,23 +67,29 @@ public class InventoryEnemy : Singleton<DataBase>
 	}
 
   	public void AddItem(int id, Item item, int count)
-   	{
-   		items[id].id = item.id;
-   		items[id].count = count;
-   		items[id].itemGameObj.GetComponent<Image>().sprite = item.image;
+   {
+      if(items.Count == 0)
+      {
+         addGraphics();
+      }
+   	items[id].id = item.id;
 
-   		if(count > 1 && item.id != 0)
-   		{
-   			items[id].itemGameObj.GetComponentInChildren<Text>().text = count.ToString();
-   		}
-   		else
-   		{
-   			items[id].itemGameObj.GetComponentInChildren<Text>().text = "";
-   		}
+   	items[id].count = count;
+   	items[id].itemGameObj.GetComponent<Image>().sprite = item.image;
+
+
+   	if(count > 1 && item.id != 0)
+   	{
+   		items[id].itemGameObj.GetComponentInChildren<Text>().text = count.ToString();
    	}
-
-   	public void AddInventoryItem(int id, ItemInventory invItem)
+   	else
    	{
+   		items[id].itemGameObj.GetComponentInChildren<Text>().text = "";
+   	}
+   }
+
+   public void AddInventoryItem(int id, ItemInventory invItem)
+   {
    		items[id].id = invItem.id;
    		items[id].count = invItem.count;
    		items[id].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[invItem.id].image;
@@ -129,47 +126,52 @@ public class InventoryEnemy : Singleton<DataBase>
 
    			items.Add(ii);
    		}
-   	}
+   }
 
-   	public void SelectObject()
-   	{
+   public void SelectObject()
+   {
    		if(currentID == -1)
    		{
    			currentID = int.Parse(es.currentSelectedGameObject.name);
 
+            if(items[currentID].id == 1)
+            {
+               GameManager.Instance.addGold(items[currentID].count);
+            }
 
-   			for(int i = 0; i < Inventory.Instance.maxCount; i++)
-   			{
-   				if(Inventory.Instance.items[i].id == items[currentID].id)
-   				{
-   					if(Inventory.Instance.items[i].count + items[currentID].count <= 128)
-   					{
-   						Inventory.Instance.AddItem(i, DataBase.Instance.items[items[currentID].id], Inventory.Instance.items[i].count + items[currentID].count);
-   						isAdded = true;
-   						break;
-   					}
-   					else if(Inventory.Instance.items[i].count != 128)
-   					{
-   						items[currentID].count = items[currentID].count + Inventory.Instance.items[i].count - 128;
-   						Inventory.Instance.AddItem(i, DataBase.Instance.items[items[currentID].id], 128);
-   						break;
-   					}
-   				}
-   			}
+            else
+            {
+   			   for(int i = 0; i < Inventory.Instance.maxCount; i++)
+   			   {
+   				   if(Inventory.Instance.items[i].id == items[currentID].id)
+   				   {
+   				      if(Inventory.Instance.items[i].count + items[currentID].count <= 128)
+   					   {
+   						   Inventory.Instance.AddItem(i, DataBase.Instance.items[items[currentID].id], Inventory.Instance.items[i].count + items[currentID].count);
+   						   isAdded = true;
+   						   break;
+   					   }
+   					   else if(Inventory.Instance.items[i].count != 128)
+   					   {   
+   						   items[currentID].count = items[currentID].count + Inventory.Instance.items[i].count - 128;
+   						   Inventory.Instance.AddItem(i, DataBase.Instance.items[items[currentID].id], 128);
+   						   break;
+   					   }
+   				   }
+   			   }
 
-   			Debug.Log(isAdded);
-
-   			if(!isAdded)
-   			{
-   				for(int i = 0; i < Inventory.Instance.maxCount; i++)
-   				{
-   					if(Inventory.Instance.items[i].id == 0)
-   					{
-   						Inventory.Instance.AddItem(i, DataBase.Instance.items[items[currentID].id], items[currentID].count);
-   						break;
-   					}
-   				}
-   			}
+   			   if(!isAdded)
+   			   {
+   				   for(int i = 0; i < Inventory.Instance.maxCount; i++)
+   				   {
+   					   if(Inventory.Instance.items[i].id == 0)
+   					   {
+   						   Inventory.Instance.AddItem(i, DataBase.Instance.items[items[currentID].id], items[currentID].count);
+   						   break;
+   					   }
+   				   }
+   			   }
+            }
 
    			AddItem(currentID, DataBase.Instance.items[0], 0);
    			Inventory.Instance.UpdateInventory();
@@ -177,10 +179,10 @@ public class InventoryEnemy : Singleton<DataBase>
    			isAdded = false;
   		}
 
-   	}
+   }
 
-   	public void UpdateInventory()
-   	{
+   public void UpdateInventory()
+   {
    		for(int i = 0; i < maxCount; i++)
    		{
    			if(items[i].id != 0 && items[i].count > 1)
@@ -196,7 +198,7 @@ public class InventoryEnemy : Singleton<DataBase>
    		}
    	}
 
-   	
+   
 
    	public ItemInventory CopyInventoryItem(ItemInventory old)
    	{
@@ -206,7 +208,7 @@ public class InventoryEnemy : Singleton<DataBase>
    		New.itemGameObj = old.itemGameObj;
    		New.count = old.count;
    		return New;
-   	}
+   }
 }
 
 [System.Serializable]

@@ -58,14 +58,14 @@ public class Generator : Singleton<Generator>
         rooms = null;
         tiles = null;
         isEnd = true;
-        //enemies = null;
-        //Invtr = null;
+        enemies = null;
+        Invtr = null;
 
         addTilesMap();
         addRoomsAndCorridors();
         addInstance();
         addObjectsOnMap(containersTiles, 20, 30);
-        //addEnemyOnMap(enemyTiles, 10, 20);
+        addEnemyOnMap(enemyTiles, 10, 20);
 
         for (int i = 1; i < rooms.Length; i++)
         {
@@ -237,6 +237,13 @@ public class Generator : Singleton<Generator>
             Invtr[i] = Instantiate(Inventory, transform.position, Quaternion.identity) as GameObject;
             Invtr[i].transform.SetParent(GameObject.Find("Inventory").transform, false);
             Invtr[i].transform.position = GameObject.Find("Inventory").transform.position;
+            
+            InventoryEnemy invtrEnemy = Invtr[i].GetComponentInChildren<InventoryEnemy>();
+
+            for(int j = 0; j < invtrEnemy.maxCount; j++)
+            {
+                invtrEnemy.AddItem(j, DataBase.Instance.items[Random.Range(0, 2)], Random.Range(0,5));
+            } 
             Invtr[i].SetActive(false);
         }
     }

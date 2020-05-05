@@ -61,12 +61,14 @@ public class ButtonManager : Singleton<ButtonManager>
 
     public void InventoryButton()
     {
-        GameManager.Instance.OpenInventory();
+        if(!GameManager.Instance.onPause)
+            GameManager.Instance.OpenInventory();
     }
 
     public void ExitInventoryButton()
     {
-        GameManager.Instance.InventoryPlayerPanel.SetActive(false);
+        if(!GameManager.Instance.onPause)
+            GameManager.Instance.InventoryPlayerPanel.SetActive(false);
     }
 
     public void changeVolumeMusic(Slider slid)
@@ -83,11 +85,8 @@ public class ButtonManager : Singleton<ButtonManager>
     {
         for(int i = 0; i < Generator.Instance.enemies.Length; i++)
         {
-            if(Player.Instance.transform.position == Generator.Instance.enemies[i].transform.position)
-            {
-                Generator.Instance.Invtr[i].SetActive(false);
-                GameManager.Instance.onPause = false;
-            } 
+            Generator.Instance.Invtr[i].SetActive(false);
+            GameManager.Instance.onPause = false;
         }
     }
 }

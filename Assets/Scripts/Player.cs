@@ -6,6 +6,7 @@ using Rogue;
 
 public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler 
 {
+    public float rayDistance;
     public float speed;
     public int stepCount;
 
@@ -27,6 +28,10 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     
     private float currentLifes;
     private float maxLifes = 10;
+    
+    RaycastHit hit;
+    Ray ray;
+
 
     public void OnPointerDown(PointerEventData eventData) 
     { 
@@ -49,6 +54,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         cam = Camera.main;
         stepPoint = transform.position;
         anim = gameObject.GetComponent<Animation>();   
+        
     }
 
     void Update()
@@ -65,12 +71,6 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
         if(transform.position == stepPoint && !isAnimation)
         {
-            for(int i = 0; i < Generator.Instance.enemies.Length; i++)
-            {
-                Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>();
-                enemy.isPunch = true;
-            }
-
             (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y); 
         }
 
@@ -79,9 +79,12 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             isMoving = false;
             HitEnemy((int)stepPoint.x, (int)stepPoint.y);
             stepPoint = transform.position;
+            Debug.Log(stepPoint);
+            GiveStepEnemies();
         }
 
-        else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Wall || Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Object)
+        else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Wall || 
+            Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Object)
         {        
             isMoving = false;
             stepPoint = transform.position;
@@ -108,6 +111,8 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             ChangeSprite();
             transform.position = Vector2.MoveTowards(transform.position, stepPoint, step);  
             cam.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
+            if(transform.position == stepPoint)
+                GiveStepEnemies();
         }  
     }
 
@@ -115,18 +120,24 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     {
         for(int i = 0; i < Generator.Instance.enemies.Length; i++)
         {
-            Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>();
-            enemy.isStep = true;
-            enemy.isPunch = true;
-
             if(x == Generator.Instance.enemies[i].transform.position.x && 
                 y == Generator.Instance.enemies[i].transform.position.y)
             {
                 ChangeSprite();
+                Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>();
                 enemy.getDamage(1);
                 AudioManager.Instance.PlayEffects(PunchSound);
             }
         }
+    }
+
+    void GiveStepEnemies()
+    {
+        for(int i = 0; i < Generator.Instance.enemies.Length; i++)
+        {
+            Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>();
+            enemy.isStep = true;
+        }        
     }
 
     public void GetDamage(int l)

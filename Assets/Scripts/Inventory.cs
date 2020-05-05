@@ -34,7 +34,7 @@ public class Inventory : Singleton<Inventory>
 	}
 	public void Update()
 	{
-		if(currentID != -1)
+		if(currentID != -1 && !GameManager.Instance.onPause)
 		{
 			MoveObject();
 		}
@@ -134,6 +134,7 @@ public class Inventory : Singleton<Inventory>
 
    	public void SelectObject()
    	{
+         /*
    		if(currentID == -1)
    		{
    			currentID = int.Parse(es.currentSelectedGameObject.name);
@@ -169,7 +170,7 @@ public class Inventory : Singleton<Inventory>
    			
    			currentID = -1;
    			movingObject.gameObject.SetActive(false);
-   		}
+   		}*/
    	}
 
    	public void UpdateInventory()

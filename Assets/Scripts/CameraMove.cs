@@ -25,7 +25,7 @@ public class CameraMove : Singleton<CameraMove>
 
     void Update()
     {
-        if (Input.touchCount == 1)
+        if (Input.touchCount == 1 && !GameManager.Instance.onPause)
         {
         	timer = Time.deltaTime;
     		_timer = _timer + timer; 
@@ -64,7 +64,7 @@ public class CameraMove : Singleton<CameraMove>
             drag = false;
         }
 
-        if (Input.touchCount == 2 )
+        if (Input.touchCount == 2 && !GameManager.Instance.onPause)
         {
             drag = false;
             Touch touch0 = Input.GetTouch(0);

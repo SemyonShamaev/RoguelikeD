@@ -12,16 +12,17 @@ public class GameManager : Singleton<GameManager>
    	public GameObject Canvas;
 
    	public GameObject GameOverPanel;
-
    	public GameObject NextLevelPanel;
    	public GameObject PausePanel;
    	public GameObject SettingsPanel;
    	public GameObject InventoryPlayerPanel;
 
    	public Text levelCount;
+   	public Text goldCount;
 
 	public AudioClip BackgroundMusic;
 	public AudioClip DeathSound;
+	public AudioClip soundOfGold;
 
 	public bool onPause = false;
 
@@ -29,6 +30,11 @@ public class GameManager : Singleton<GameManager>
 
 	Animation TransitionAnim;
 
+	void Start()
+	{
+		Application.targetFrameRate = 60;
+	}
+	
    	void Awake()
    	{
    		Time.timeScale = 1;
@@ -88,7 +94,7 @@ public class GameManager : Singleton<GameManager>
 	{
 		onPause = false;
 		Time.timeScale = 1;
-		
+
 		TransitionAnim = GameObject.Find("Panel").GetComponent<Animation>();
 		TransitionAnim.Play("Transition");
 
@@ -109,8 +115,13 @@ public class GameManager : Singleton<GameManager>
 	{
 		AudioManager.Instance.PauseMusic();
 		AudioManager.Instance.PlayEffects(DeathSound);
+		onPause = true;
+		GameOverPanel.SetActive(true);
+	}
 
-		GameObject GameOverPnl = Instantiate(GameOverPanel, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
-    	GameOverPnl.transform.SetParent(Canvas.transform, false);
+	public void addGold(int GoldCount)
+	{
+		goldCount.text = (int.Parse(goldCount.text) + GoldCount).ToString();
+		AudioManager.Instance.PlayEffects(soundOfGold);
 	}
 }

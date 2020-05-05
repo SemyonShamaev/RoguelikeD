@@ -8,6 +8,11 @@ public class AudioManager : Singleton<AudioManager>
     public GameObject effectsSource;                    
     public GameObject musicSource;                                  
         
+    void Start()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
+
     public void PlayEffects(AudioClip clip)
     { 
         GameObject sound = (GameObject)Instantiate(effectsSource);
@@ -34,6 +39,7 @@ public class AudioManager : Singleton<AudioManager>
         AudioSource soundSource = sound.GetComponent<AudioSource>();
         soundSource.clip = clip;
         soundSource.Play();
+        soundSource.loop = true;
     }
 
     public void PauseMusic()
