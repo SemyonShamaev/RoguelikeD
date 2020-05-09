@@ -30,12 +30,12 @@ public class GameManager : Singleton<GameManager>
 
 	Animation TransitionAnim;
 
-	void Start()
+	private void Start()
 	{
 		Application.targetFrameRate = 60;
 	}
 	
-   	void Awake()
+   	private void Awake()
    	{
    		Time.timeScale = 1;
    		
@@ -47,7 +47,7 @@ public class GameManager : Singleton<GameManager>
    		InitGame();
    	}
 
-   	void InitGame()
+   	private void InitGame()
 	{
 		Generator.setupScene(level);
 	}
@@ -87,6 +87,7 @@ public class GameManager : Singleton<GameManager>
 
 	public void OpenInventory()
 	{
+		onPause = true;
 		InventoryPlayerPanel.SetActive(!InventoryPlayerPanel.activeSelf);
 	}
 
@@ -100,15 +101,21 @@ public class GameManager : Singleton<GameManager>
 
 		NextLevelPanel.SetActive(false);
 
-		foreach (Transform child in transform) Destroy(child.gameObject);
+		DestroyAllObjects();
+
 		level++;
 		levelCount.text = level.ToString();
 
 		Generator.Instance.setupScene(level);
 		
-		Player.Instance.transform.position = new Vector3(100,100,0);
-		Player.Instance.stepPoint = Player.Instance.transform.position;
+		Player.Instance.transform.position = new Vector3(100, 100, 0);
+		Player.Instance.stepPoint = Vector3Int.FloorToInt(Player.Instance.transform.position);
 		Camera.main.transform.position = new Vector3(100, 100, -5);	
+	}
+
+	private void DestroyAllObjects()
+	{
+		foreach (Transform child in transform) Destroy(child.gameObject);
 	}
 
 	public void GameOver()

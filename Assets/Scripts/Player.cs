@@ -6,81 +6,75 @@ using Rogue;
 
 public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler 
 {
-    public float rayDistance;
     public float speed;
     public int stepCount;
-
     public Vector2 point;
+    public Slider HealthBar;
     public Vector3 stepPoint;
-   
+    public AudioClip getDamage;
+    public AudioClip PunchSound;
+    public AudioClip EatSound;
     public bool isMoving = false;
     public bool isAnimation = false;
-
-    public AudioClip PunchSound;
-    public AudioClip getDamage;
-
-    public Slider HealthBar;
     public Sprite[] sprites = new Sprite[4];
 
     private Camera cam;
     private Animation anim;
-    private bool isDeath = false;
-    
     private float currentLifes;
     private float maxLifes = 10;
-    
-    RaycastHit hit;
-    Ray ray;
+    private bool isDeath = false;
 
-
-    public void OnPointerDown(PointerEventData eventData) 
-    { 
-
-    } 
-
+    public void OnPointerDown(PointerEventData eventData) { } 
     public void OnPointerUp(PointerEventData eventData)
     {   
         if(!GameManager.Instance.onPause)
         {
-            point = cam.ScreenToWorldPoint(new Vector3((int)Mathf.Round(eventData.position.x), (int)Mathf.Round(eventData.position.y), 0)); 
+            point = Camera.main.ScreenToWorldPoint(new Vector3((int)Mathf.Round(eventData.position.x), (int)Mathf.Round(eventData.position.y), 0)); 
             point = new Vector2((int)Mathf.Round(point.x), (int)Mathf.Round(point.y));
             isMoving = true; 
         }    
     }
 
-    void Start()
+    private void Start()
     {
         currentLifes = maxLifes;
-        cam = Camera.main;
         stepPoint = transform.position;
-        anim = gameObject.GetComponent<Animation>();   
-        
+        anim = gameObject.GetComponent<Animation>();      
     }
 
-    void Update()
+    private void Update()
     {   
-        if (isMoving && !isDeath)
-        {
-            Move();  
-        }
+        if (isMoving)
+            if(!isDeath)
+                Move();  
     }
 
-    void Move()
+    private void Move()
     {
-        float step = speed * Time.deltaTime;
-
-        if(transform.position == stepPoint && !isAnimation)
-        {
-            (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y); 
-        }
+        if(transform.position == stepPoint)
+            if(!isAnimation)
+                (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y); 
 
         if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Enemy)
         {
             isMoving = false;
             HitEnemy((int)stepPoint.x, (int)stepPoint.y);
             stepPoint = transform.position;
-            Debug.Log(stepPoint);
-            GiveStepEnemies();
+        }
+
+        else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Object)
+        {
+            for(int i = 0; i < Generator.Instance.containers.Length; i++)
+            {
+                if(Generator.Instance.containers[i].transform.position == stepPoint)
+                {
+                    Generator.Instance.InvtrContainers[i].SetActive(true);
+                }
+            }
+
+            isMoving = false;
+            stepPoint = transform.position;
+            GameManager.Instance.onPause = true;
         }
 
         else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Wall || 
@@ -92,46 +86,40 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
         else if (transform.position.x == (int)point.x && transform.position.y == (int)point.y)
         {
-            if(Generator.Instance.tiles[(int)point.x][(int)point.y] == Generator.TileType.Drop)
-            {
-                for(int i = 0; i < Generator.Instance.enemies.Length; i++)
-                {
-                    if(transform.position == Generator.Instance.enemies[i].transform.position)
-                    {
-                        Generator.Instance.Invtr[i].SetActive(true);
-                        GameManager.Instance.onPause = true;
-                    } 
-                }
-            }
             isMoving = false; 
+
+            if(Generator.Instance.tiles[(int)point.x][(int)point.y] == Generator.TileType.Drop)
+                OpenDrop(); 
         }
 
         else
         {
             ChangeSprite();
-            transform.position = Vector2.MoveTowards(transform.position, stepPoint, step);  
-            cam.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
+            transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime);  
+            Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
+
             if(transform.position == stepPoint)
                 GiveStepEnemies();
         }  
     }
 
-    void HitEnemy(int x, int y)
+    private void HitEnemy(int x, int y)
     {
         for(int i = 0; i < Generator.Instance.enemies.Length; i++)
         {
             if(x == Generator.Instance.enemies[i].transform.position.x && 
                 y == Generator.Instance.enemies[i].transform.position.y)
             {
-                ChangeSprite();
                 Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>();
-                enemy.getDamage(1);
+                enemy.GetDamage(1);
+
+                ChangeSprite();
                 AudioManager.Instance.PlayEffects(PunchSound);
             }
         }
     }
 
-    void GiveStepEnemies()
+    private void GiveStepEnemies()
     {
         for(int i = 0; i < Generator.Instance.enemies.Length; i++)
         {
@@ -143,9 +131,11 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public void GetDamage(int l)
     {
         anim.Play("GetDamage");
-        currentLifes -= l;
         AudioManager.Instance.PlayEffects(getDamage);
+
+        currentLifes -= l;
         HealthBar.value = currentLifes / maxLifes;
+
         if(currentLifes <= 0)
         {
             isDeath = true;
@@ -154,40 +144,17 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         }
     }
 
-    (int a, int b) FindPlace(int x, int y, int sx, int sy)
+    public void HealPlayer()
     {
-        if((sx == x - 1 && sy == y) || (sx == x + 1 && sy == y) || (sx == x && sy == y - 1) || (sx == x && sy == y + 1))
-            return (x,y);
-        if((Generator.Instance.tiles[x+1][y]==Generator.TileType.Floor || Generator.Instance.tiles[x+1][y]==Generator.TileType.CorridorFloor) && sx>x)
-            return (x+1,y);
-        if((Generator.Instance.tiles[x-1][y]==Generator.TileType.Floor || Generator.Instance.tiles[x-1][y]==Generator.TileType.CorridorFloor) && sx<x)
-            return (x-1,y);
-        if((Generator.Instance.tiles[x][y+1]==Generator.TileType.Floor || Generator.Instance.tiles[x][y+1]==Generator.TileType.CorridorFloor) && sy>y)
-            return (x,y+1);
-        if((Generator.Instance.tiles[x][y-1]==Generator.TileType.Floor || Generator.Instance.tiles[x][y-1]==Generator.TileType.CorridorFloor) && sy<y)
-            return (x,y-1);
-        if(Generator.Instance.tiles[x+1][y]==Generator.TileType.Floor || Generator.Instance.tiles[x+1][y]==Generator.TileType.CorridorFloor)
-            return (x+1,y);
-        if(Generator.Instance.tiles[x-1][y]==Generator.TileType.Floor || Generator.Instance.tiles[x-1][y]==Generator.TileType.CorridorFloor)
-            return (x-1,y);
-        if(Generator.Instance.tiles[x][y+1]==Generator.TileType.Floor || Generator.Instance.tiles[x][y+1]==Generator.TileType.CorridorFloor)
-            return (x,y+1);
-        if(Generator.Instance.tiles[x][y-1]==Generator.TileType.Floor || Generator.Instance.tiles[x][y-1]==Generator.TileType.CorridorFloor)
-            return (x,y-1);
-        return((int)transform.position.x, (int)transform.position.y);
+        AudioManager.Instance.PlayEffects(EatSound);
+        if(currentLifes != maxLifes)
+        {
+            currentLifes++;
+            HealthBar.value = currentLifes / maxLifes;
+        }
     }
 
-    void startAnimation()
-    {
-        isAnimation = true;
-    }
-
-    void endAnimation()
-    {
-        isAnimation = false;
-    }
-
-    void ChangeSprite()
+    private void ChangeSprite()
     {
         if(stepPoint.x > (int)transform.position.x)
             GetComponent<SpriteRenderer>().sprite = sprites[0];
@@ -199,7 +166,19 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             GetComponent<SpriteRenderer>().sprite = sprites[3];
     }
 
-    (int a, int b) FindWave(int startX, int startY, int targetX, int targetY) //Волновой алгоритм
+    private void OpenDrop()
+    {
+        for(int i = 0; i < Generator.Instance.enemies.Length; i++)
+        {
+            if(transform.position == Generator.Instance.enemies[i].transform.position)
+            {
+                Generator.Instance.Invtr[i].SetActive(true);
+                GameManager.Instance.onPause = true;
+            } 
+        }
+    }
+
+    private (int a, int b) FindWave(int startX, int startY, int targetX, int targetY) //Волновой алгоритм
     {
         int x, y,step=0;
         int stepX = 0, stepY = 0;
@@ -298,6 +277,16 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             
         isMoving = false;
         return (startX,startY);
+    }
+
+    private void startAnimation()
+    {
+        isAnimation = true;
+    }
+
+    private void endAnimation()
+    {
+        isAnimation = false;
     }
 }
 

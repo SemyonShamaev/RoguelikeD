@@ -8,22 +8,20 @@ public class CameraMove : Singleton<CameraMove>
     private bool zoom = false;
     private float timer = 0;
     private float _timer = 0;
-
     private Vector3 initialTouchPosition;
     private Vector3 initialCameraPosition;
     private Vector3 initialTouch0Position;
     private Vector3 initialTouch1Position;
     private Vector3 initialMidPointScreen;
     private float initialOrthographicSize;
+    private Camera cam;
 
-    private Camera camera;
-
-    void Start()
+    private void Start()
     {
-    	camera = GetComponent<Camera>();
+    	cam = GetComponent<Camera>();
     }
 
-    void Update()
+    private void Update()
     {
         if (Input.touchCount == 1 && !GameManager.Instance.onPause)
         {
@@ -44,8 +42,8 @@ public class CameraMove : Singleton<CameraMove>
                 	}
                 	else
                 	{
-                    	Vector2 delta = camera.ScreenToWorldPoint(touch0.position) - 
-                                    camera.ScreenToWorldPoint(initialTouchPosition);
+                    	Vector2 delta = cam.ScreenToWorldPoint(touch0.position) - 
+                                    cam.ScreenToWorldPoint(initialTouchPosition);
 
                     	Vector3 newPos = initialCameraPosition;
                     	newPos.x -= delta.x;
@@ -81,19 +79,19 @@ public class CameraMove : Singleton<CameraMove>
             else
             {
                 this.transform.position = initialCameraPosition;
-                camera.orthographicSize = initialOrthographicSize;
+                cam.orthographicSize = initialOrthographicSize;
 
                 float scaleFactor = GetScaleFactor(touch0.position, touch1.position, initialTouch0Position, initialTouch1Position);
 
                 Vector2 currentMidPoint = (touch0.position + touch1.position) / 2;
-                Vector3 initialPointWorldBeforeZoom = camera.ScreenToWorldPoint(initialMidPointScreen);
+                Vector3 initialPointWorldBeforeZoom = cam.ScreenToWorldPoint(initialMidPointScreen);
 
                 Camera.main.orthographicSize = initialOrthographicSize / scaleFactor;
 
-                Vector3 initialPointWorldAfterZoom = camera.ScreenToWorldPoint(initialMidPointScreen);
+                Vector3 initialPointWorldAfterZoom = cam.ScreenToWorldPoint(initialMidPointScreen);
                 Vector2 initialPointDelta = initialPointWorldBeforeZoom - initialPointWorldAfterZoom;
 
-                Vector2 oldAndNewPointDelta = camera.ScreenToWorldPoint(currentMidPoint) - camera.ScreenToWorldPoint(initialMidPointScreen);
+                Vector2 oldAndNewPointDelta = cam.ScreenToWorldPoint(currentMidPoint) - cam.ScreenToWorldPoint(initialMidPointScreen);
 
                 Vector3 newPos = initialCameraPosition;
                 newPos.x -= oldAndNewPointDelta.x - initialPointDelta.x;

@@ -63,12 +63,16 @@ public class ButtonManager : Singleton<ButtonManager>
     {
         if(!GameManager.Instance.onPause)
             GameManager.Instance.OpenInventory();
+        else
+        {
+            GameManager.Instance.onPause = false;
+            GameManager.Instance.InventoryPlayerPanel.SetActive(false);
+        }
     }
 
-    public void ExitInventoryButton()
+    public void Next()
     {
-        if(!GameManager.Instance.onPause)
-            GameManager.Instance.InventoryPlayerPanel.SetActive(false);
+        GameManager.Instance.onPause = false;
     }
 
     public void changeVolumeMusic(Slider slid)
