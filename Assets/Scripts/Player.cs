@@ -39,7 +39,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     {
         currentLifes = maxLifes;
         stepPoint = transform.position;
-        anim = gameObject.GetComponent<Animation>();      
+        anim = gameObject.GetComponent<Animation>();     
     }
 
     private void Update()
@@ -107,12 +107,12 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     {
         for(int i = 0; i < Generator.Instance.enemies.Length; i++)
         {
+            Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>(); // использовать наблюдателя
+            enemy.isStep = true;
             if(x == Generator.Instance.enemies[i].transform.position.x && 
                 y == Generator.Instance.enemies[i].transform.position.y)
             {
-                Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>();
                 enemy.GetDamage(1);
-
                 ChangeSprite();
                 AudioManager.Instance.PlayEffects(PunchSound);
             }
@@ -130,6 +130,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     public void GetDamage(int l)
     {
+        point = stepPoint;
         anim.Play("GetDamage");
         AudioManager.Instance.PlayEffects(getDamage);
 

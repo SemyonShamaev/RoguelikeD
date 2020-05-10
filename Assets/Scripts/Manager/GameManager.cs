@@ -33,17 +33,15 @@ public class GameManager : Singleton<GameManager>
 	private void Start()
 	{
 		Application.targetFrameRate = 60;
+		AudioManager.Instance.PlayMusic(BackgroundMusic);
 	}
 	
    	private void Awake()
    	{
    		Time.timeScale = 1;
-   		
    		AudioManager.Instance.RestoreMusic();
-   		AudioManager.Instance.PlayMusic(BackgroundMusic);
-
    		Generator = GetComponent<Generator>();
-   		
+
    		InitGame();
    	}
 
@@ -81,6 +79,7 @@ public class GameManager : Singleton<GameManager>
 	{
 		PausePanel.SetActive(false);
 		SettingsPanel.SetActive(false);
+
 		onPause = false;
 		Time.timeScale = 1;
 	}

@@ -21,11 +21,18 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
+        if(playerOnVisible)
+            if(CheckPlayerNearby())
+                    if(isStep)
+                        if(!Player.Instance.isAnimation)
+                            HitPlayer();
+
         if(isStep)
             if(playerOnVisible)
                 Move();
 
-        transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime); //исправить
+        if(playerOnVisible)
+                transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime);
     }
 
     private void Move()
@@ -84,7 +91,8 @@ public class Enemy : MonoBehaviour
             {
                 if (Generator.Instance.tiles[x][y] != Generator.TileType.Floor && 
                     Generator.Instance.tiles[x][y] != Generator.TileType.CorridorFloor && 
-                    Generator.Instance.tiles[x][y] != Generator.TileType.End)
+                    Generator.Instance.tiles[x][y] != Generator.TileType.End &&
+                    Generator.Instance.tiles[x][y] != Generator.TileType.Drop)
                     cMap[x, y] = -2;
                 else
                     cMap[x, y] = -1;
@@ -182,6 +190,21 @@ public class Enemy : MonoBehaviour
     private void OnBecameInvisible()
     {
         playerOnVisible = false;
+    }
+
+    bool CheckPlayerNearby()
+    {
+        if((Player.Instance.stepPoint.x == transform.position.x + 1 && Player.Instance.stepPoint.y == transform.position.y + 1) ||
+           (Player.Instance.stepPoint.x == transform.position.x + 1 && Player.Instance.stepPoint.y == transform.position.y - 1) ||
+           (Player.Instance.stepPoint.x == transform.position.x + 1 && Player.Instance.stepPoint.y == transform.position.y) ||
+           (Player.Instance.stepPoint.x == transform.position.x - 1 && Player.Instance.stepPoint.y == transform.position.y + 1) ||
+           (Player.Instance.stepPoint.x == transform.position.x - 1 && Player.Instance.stepPoint.y == transform.position.y - 1) ||
+           (Player.Instance.stepPoint.x == transform.position.x - 1 && Player.Instance.stepPoint.y == transform.position.y) ||
+           (Player.Instance.stepPoint.x == transform.position.x && Player.Instance.stepPoint.y == transform.position.y + 1) ||
+           (Player.Instance.stepPoint.x == transform.position.x && Player.Instance.stepPoint.y == transform.position.y - 1))
+            return true;
+        else
+            return false;
     }
 
     void startAnimation(){}

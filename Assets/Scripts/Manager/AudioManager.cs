@@ -7,11 +7,6 @@ public class AudioManager : Singleton<AudioManager>
     public GameObject uiSource;
     public GameObject effectsSource;                    
     public GameObject musicSource;                                  
-        
-    void Start()
-    {
-        DontDestroyOnLoad(gameObject);
-    }
 
     public void PlayEffects(AudioClip clip)
     { 
