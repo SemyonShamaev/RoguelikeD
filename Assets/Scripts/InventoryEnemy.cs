@@ -135,6 +135,17 @@ public class InventoryEnemy : Singleton<DataBase>
   			items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[items[i].id].image;
    	}
    }
+
+   public void LoadData(Save.EnemyInventorySaveData save, int k)
+   {
+      AddItem(k, DataBase.Instance.items[save.id], save.count, DataBase.Instance.items[save.id].type);
+   }
+
+   public void LoadDataContainers(Save.ContainersInventorySaveData save, int k)
+   {
+      AddItem(k, DataBase.Instance.items[save.id], save.count, DataBase.Instance.items[save.id].type);
+   }
+
 }
 
 [System.Serializable]
@@ -146,3 +157,5 @@ public class ItemInventory
 	public int count;
    public DataBase.ItemType type;
 }
+
+

@@ -17,10 +17,10 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public bool isMoving = false;
     public bool isAnimation = false;
     public Sprite[] sprites = new Sprite[4];
+    public float currentLifes;
 
     private Camera cam;
     private Animation anim;
-    private float currentLifes;
     private float maxLifes = 10;
     private bool isDeath = false;
 
@@ -289,5 +289,26 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     {
         isAnimation = false;
     }
+
+    public void LoadData(Save.PlayerSaveData save)
+    {
+        transform.position = new Vector3(save.position.x, save.position.y, save.position.z);
+        stepPoint = new Vector3(save.stepPoint.x, save.stepPoint.y, save.stepPoint.z);
+        point = new Vector2(save.point.x, save.point.y);
+        currentLifes = save.currentLifes;
+        isMoving = save.isMoving;
+        isAnimation = save.isAnimation;
+        Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
+
+        HealthBar.value = currentLifes / maxLifes;
+
+        if(currentLifes <= 0)
+        {
+            isDeath = true;
+            anim.Play("Death");
+            GameManager.Instance.GameOver();
+        }
+    }
 }
 
+  

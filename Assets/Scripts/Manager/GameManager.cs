@@ -35,6 +35,7 @@ public class GameManager : Singleton<GameManager>
 		Application.targetFrameRate = 60;
 		AudioManager.Instance.PlayMusic(BackgroundMusic);
 	}
+
 	
    	private void Awake()
    	{
@@ -112,7 +113,7 @@ public class GameManager : Singleton<GameManager>
 		Camera.main.transform.position = new Vector3(100, 100, -5);	
 	}
 
-	private void DestroyAllObjects()
+	public void DestroyAllObjects()
 	{
 		foreach (Transform child in transform) Destroy(child.gameObject);
 	}

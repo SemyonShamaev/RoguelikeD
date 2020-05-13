@@ -29,6 +29,7 @@ public class ButtonManager : Singleton<ButtonManager>
 
     public void ReturnMenuButton()
     {
+        SaveLoadManager.Instance.SaveGame();
     	SceneManager.LoadScene("MainMenu");
     	AudioManager.Instance.RestoreMusic();
     }

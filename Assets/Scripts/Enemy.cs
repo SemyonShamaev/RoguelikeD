@@ -7,11 +7,11 @@ public class Enemy : MonoBehaviour
 	public GameObject enemy;
     public GameObject drop;
 	public bool isStep = false;
+    public bool isSleep = true;
+    public Vector3 stepPoint;
 
     private Animation anim;
-	private Vector3 stepPoint;
 	private Vector3 playerPosition;
-    private bool playerOnVisible = false;
 
 	private void Start()
 	{
@@ -21,18 +21,23 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
-        if(playerOnVisible)
-            if(CheckPlayerNearby())
-                    if(isStep)
-                        if(!Player.Instance.isAnimation)
-                            HitPlayer();
+        float dist = Vector3.Distance(Player.Instance.transform.position, transform.position);
+        
+        if(dist < 4)
+            isSleep = false;
 
-        if(isStep)
-            if(playerOnVisible)
+        if(!isSleep)
+        {
+            if(dist == 1)
+                if(isStep)
+                    if(!Player.Instance.isAnimation)
+                        HitPlayer();
+
+            if(isStep)
                 Move();
 
-        if(playerOnVisible)
-                transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime);
+        }
     }
 
     private void Move()
@@ -182,33 +187,21 @@ public class Enemy : MonoBehaviour
         return (startX,startY);
     }
 
-    private void OnBecameVisible()
+    public void LoadData(Save.EnemySaveData save)
     {
-        playerOnVisible = true;
-    }
+        transform.position = new Vector3(save.position.x, save.position.y, save.position.z);
+        stepPoint = new Vector3(save.stepPoint.x, save.stepPoint.y, save.stepPoint.z);
+        lifes = save.lifes;
+        isStep = save.isStep;
+        isSleep = save.isSleep;
 
-    private void OnBecameInvisible()
-    {
-        playerOnVisible = false;
-    }
-
-    bool CheckPlayerNearby()
-    {
-        if((Player.Instance.stepPoint.x == transform.position.x + 1 && Player.Instance.stepPoint.y == transform.position.y + 1) ||
-           (Player.Instance.stepPoint.x == transform.position.x + 1 && Player.Instance.stepPoint.y == transform.position.y - 1) ||
-           (Player.Instance.stepPoint.x == transform.position.x + 1 && Player.Instance.stepPoint.y == transform.position.y) ||
-           (Player.Instance.stepPoint.x == transform.position.x - 1 && Player.Instance.stepPoint.y == transform.position.y + 1) ||
-           (Player.Instance.stepPoint.x == transform.position.x - 1 && Player.Instance.stepPoint.y == transform.position.y - 1) ||
-           (Player.Instance.stepPoint.x == transform.position.x - 1 && Player.Instance.stepPoint.y == transform.position.y) ||
-           (Player.Instance.stepPoint.x == transform.position.x && Player.Instance.stepPoint.y == transform.position.y + 1) ||
-           (Player.Instance.stepPoint.x == transform.position.x && Player.Instance.stepPoint.y == transform.position.y - 1))
-            return true;
-        else
-            return false;
+        if(lifes <= 0)
+        {
+            Death();
+        }
     }
 
     void startAnimation(){}
     void endAnimation(){}
 }
-
 	

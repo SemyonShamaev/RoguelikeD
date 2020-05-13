@@ -129,4 +129,12 @@ public class Inventory : Singleton<Inventory>
    		pos.z = InventoryMainObject.GetComponent<RectTransform>().position.z;
    		movingObject.position = cam.ScreenToWorldPoint(pos);
     }
+
+    public void LoadData(List<Save.PlayerInventorySaveData> save)
+    {
+    	for(int i = 0; i < maxCount; i++)
+    	{
+    		AddItem(i, DataBase.Instance.items[save[i].id], save[i].count, DataBase.Instance.items[save[i].id].type);
+    	}
+    }
 } 

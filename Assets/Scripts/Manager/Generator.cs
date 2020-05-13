@@ -1,10 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 using Rogue;
 
 public class Generator : Singleton<Generator>
 {
+    public enum TileType 
+    {
+        Empty, Wall, Floor, CorridorFloor, End, Start, Object, Enemy, Drop
+    };
+
+    public TileType[][] tiles;
+
     public int MapRows; 
     public int MapColumns; 
     public int roomWidth; 
@@ -20,8 +30,10 @@ public class Generator : Singleton<Generator>
     public GameObject[] Invtr;
     public GameObject[] InvtrContainers;
     public GameObject Inventory;
-    public TileType[][] tiles;
+  
+
     public bool isEnd = true;
+
 
     private Room[] rooms; 
     private Corridor[] corridors;
@@ -150,7 +162,7 @@ public class Generator : Singleton<Generator>
 
     private void addInstance()
     {
-         for (int i = 1; i < tiles.Length - 1; i++)
+        for (int i = 1; i < tiles.Length - 1; i++)
         {
             for (int j = 1; j < tiles[i].Length - 1; j++)
             {
@@ -174,7 +186,7 @@ public class Generator : Singleton<Generator>
                     GameObject wallInstance = Instantiate(wallTiles[SelectTileWall(i, j)], positionWall, Quaternion.identity) as GameObject;
                     wallInstance.transform.parent = transform;
                 }
-                else if (tiles[i][j] == TileType.Floor || tiles[i][j] == TileType.CorridorFloor)
+                else if(tiles[i][j] != TileType.Empty)
                 {
                     Vector3 positionFloor = new Vector3(i, j, 0f);
                     GameObject floorInstance = Instantiate(floorTiles[0], positionFloor, Quaternion.identity) as GameObject;
@@ -182,14 +194,13 @@ public class Generator : Singleton<Generator>
                 }    
             }
         }
-
     }
 
     private void addPositions()
     {
         for(int i = 0; i < MapColumns; i++)
         {
-            for(int j =0; j < MapRows; j++)
+            for(int j = 0; j < MapRows; j++)
             {
                 if(tiles[i][j] == TileType.Floor && CheckWall(i, j) && CheckCorridorFloor(i, j))
                     gridPositions.Add(new Vector3(i, j));
@@ -348,8 +359,104 @@ public class Generator : Singleton<Generator>
         return 0;
     }
 
-    public enum TileType 
+
+
+
+
+    public void LoadData(List<Save.MapSaveData> save)
     {
-        Empty, Wall, Floor, CorridorFloor, End, Start, Object, Enemy, Drop
+        gridPositions.Clear();
+        enemyPositions.Clear();
+
+        rooms = null;
+        tiles = null;
+        isEnd = true;
+        enemies = null;
+        Invtr = null;
+        GameManager.Instance.DestroyAllObjects();
+        addTilesMap();
+ 
+        int n = 0;
+        for(int i = 0; i < MapColumns; i++)
+        {
+            for(int j = 0; j < MapRows; j++)
+            {
+                tiles[i][j] = (TileType)save[n].tiles;
+                n++;
+            }
+        }
+        
+        for (int i = 1; i < tiles.Length - 1; i++)
+        {
+            for (int j = 1; j < tiles[i].Length - 1; j++)
+            {
+                if (tiles[i][j] == TileType.End)
+                {
+                    endPosition = new Vector3(i, j, 0f);
+                    GameObject endInstance = Instantiate(endTiles[0], endPosition, Quaternion.identity) as GameObject;
+                    endInstance.transform.parent = transform;
+                }
+                else if (tiles[i][j] == TileType.Wall)
+                {
+                    Vector3 positionWall = new Vector3(i, j, 0f);
+                    GameObject wallInstance = Instantiate(wallTiles[SelectTileWall(i, j)], positionWall, Quaternion.identity) as GameObject;
+                    wallInstance.transform.parent = transform;
+                }
+                else if(tiles[i][j] != TileType.Empty)
+                {
+                    Vector3 positionFloor = new Vector3(i, j, 0f);
+                    GameObject floorInstance = Instantiate(floorTiles[0], positionFloor, Quaternion.identity) as GameObject;
+                    floorInstance.transform.parent = transform;
+                }    
+            }
+        }
+
+        containers = new GameObject[save[0].containersCount];
+        InvtrContainers = new GameObject[containers.Length];
+
+        for (int i = 0; i < containers.Length; i++)
+        {
+            GameObject tileChoice = containersTiles[Random.Range(0, containersTiles.Length)];
+            containers[i] = Instantiate(tileChoice, new Vector3(0,0,0), Quaternion.identity) as GameObject;
+            containers[i].transform.parent = transform;
+            tiles[0][0] = TileType.Object; 
+
+            InvtrContainers[i] = Instantiate(Inventory, transform.position, Quaternion.identity) as GameObject;
+            InvtrContainers[i].transform.SetParent(GameObject.Find("ContainersInventories").transform, false);
+            InvtrContainers[i].transform.position = GameObject.Find("ContainersInventories").transform.position;
+            
+            InventoryEnemy InventoryContainers = InvtrContainers[i].GetComponentInChildren<InventoryEnemy>();
+            
+            int ItemId;
+            for(int j = 0; j < InventoryContainers.maxCount; j++)
+            {
+                ItemId = Random.Range(0, 3);
+                InventoryContainers.AddItem(j, DataBase.Instance.items[ItemId], Random.Range(1,5), DataBase.Instance.items[ItemId].type);
+            } 
+        }
+
+        enemies = new GameObject[save[0].enemyCount]; 
+        Invtr = new GameObject[enemies.Length];
+        for (int i = 0; i <  enemies.Length; i++)
+        {
+            GameObject tileChoice = enemyTiles[Random.Range(0, enemyTiles.Length)];
+            enemies[i] = Instantiate(tileChoice, new Vector3(0,0,0), Quaternion.identity) as GameObject;
+            enemies[i].transform.parent = transform;
+            tiles[0][0] = TileType.Enemy;
+
+            Invtr[i] = Instantiate(Inventory, transform.position, Quaternion.identity) as GameObject;
+            Invtr[i].transform.SetParent(GameObject.Find("EnemyInventories").transform, false);
+            Invtr[i].transform.position = GameObject.Find("EnemyInventories").transform.position;
+            
+            InventoryEnemy invtrEnemy = Invtr[i].GetComponentInChildren<InventoryEnemy>();
+
+            int ItemId;
+            for(int j = 0; j < invtrEnemy.maxCount; j++)
+            {
+                ItemId = Random.Range(0, 3);
+                invtrEnemy.AddItem(j, DataBase.Instance.items[ItemId], Random.Range(1,5), DataBase.Instance.items[ItemId].type);
+            } 
+        }
     }
 }
+
