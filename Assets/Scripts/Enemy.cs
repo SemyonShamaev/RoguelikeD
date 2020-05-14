@@ -10,43 +10,58 @@ public class Enemy : MonoBehaviour
     public bool isSleep = true;
     public Vector3 stepPoint;
 
-    private Animation anim;
 	private Vector3 playerPosition;
+    private bool isDeath = false;
+    private SpriteRenderer sprite;
+    private Animator anim;
 
 	private void Start()
 	{
-		anim = this.GetComponent<Animation>();
 		stepPoint = transform.position;
+        anim = GetComponent<Animator>();
+        sprite = GetComponent<SpriteRenderer>();
 	}
 
     private void Update()
     {
-        float dist = Vector3.Distance(Player.Instance.transform.position, transform.position);
-        
-        if(dist < 4)
-            isSleep = false;
-
-        if(!isSleep)
+        if(!isDeath)
         {
-            if(dist == 1)
+            float dist = Vector3.Distance(Player.Instance.transform.position, transform.position);
+        
+            if(dist < 4 && isSleep)
+                isSleep = false;
+
+            if(!isSleep)
+            {
+                if(dist == 1)
+                    if(isStep)
+                        if(!Player.Instance.isAnimation)
+                            HitPlayer();
+
                 if(isStep)
-                    if(!Player.Instance.isAnimation)
-                        HitPlayer();
+                    Move();
 
-            if(isStep)
-                Move();
 
-            transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime);
+                transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime);
+            }
         }
     }
 
     private void Move()
     {
-    	if(transform.position == stepPoint && !Player.Instance.isAnimation)
+        anim.Play("Walking", 0, 0.5f);
+    	if(transform.position == stepPoint)
+        {
             (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)Player.Instance.transform.position.x, (int)Player.Instance.transform.position.y);   
+            isStep = false;
+            ChangeSprite();
+        }
 
         if(stepPoint == Player.Instance.transform.position || stepPoint == Player.Instance.stepPoint)
-           HitPlayer();
+            if(isStep)
+                HitPlayer();
+            else
+                stepPoint = transform.position;
 
         else
         {
@@ -57,6 +72,7 @@ public class Enemy : MonoBehaviour
 
     private void HitPlayer()
     {
+        anim.Play("Hit", 0, 0.25f);
         stepPoint = transform.position;
         Player.Instance.GetDamage(1);
         isStep = false;
@@ -64,18 +80,19 @@ public class Enemy : MonoBehaviour
 
     private void Death()
     {
-    	enemy.SetActive(false); 
-        GameObject dropEnemy = Instantiate(drop, transform.position, Quaternion.identity) as GameObject;
+        anim.Play("Death", 0, 0.25f);
+        isDeath = true;
+    	//enemy.SetActive(false); 
+        //GameObject dropEnemy = Instantiate(drop, transform.position, Quaternion.identity) as GameObject;
        
-        dropEnemy.transform.SetParent(GameManager.Instance.transform, false);
-        dropEnemy.transform.position = transform.position;
+        //dropEnemy.transform.SetParent(GameManager.Instance.transform, false);
+        //dropEnemy.transform.position = transform.position;
        
     	Generator.Instance.tiles[(int)enemy.transform.position.x][(int)enemy.transform.position.y] = Generator.TileType.Drop;
     }
 
     public void GetDamage(int l)
     {
-        anim.Play("GetDamage");
         lifes -= l;
 
         if(lifes <= 0)
@@ -96,7 +113,6 @@ public class Enemy : MonoBehaviour
             {
                 if (Generator.Instance.tiles[x][y] != Generator.TileType.Floor && 
                     Generator.Instance.tiles[x][y] != Generator.TileType.CorridorFloor && 
-                    Generator.Instance.tiles[x][y] != Generator.TileType.End &&
                     Generator.Instance.tiles[x][y] != Generator.TileType.Drop)
                     cMap[x, y] = -2;
                 else
@@ -187,6 +203,14 @@ public class Enemy : MonoBehaviour
         return (startX,startY);
     }
 
+    private void ChangeSprite()
+    {
+        if(Player.Instance.transform.position.x <= transform.position.x)
+            sprite.flipX = true;
+        else
+            sprite.flipX = false;
+    }
+
     public void LoadData(Save.EnemySaveData save)
     {
         transform.position = new Vector3(save.position.x, save.position.y, save.position.z);
@@ -197,11 +221,10 @@ public class Enemy : MonoBehaviour
 
         if(lifes <= 0)
         {
-            Death();
+            isDeath = true;
+            Animator anim = GetComponent<Animator>();
+            anim.Play("Death", 0, 0.25f);
         }
     }
-
-    void startAnimation(){}
-    void endAnimation(){}
 }
 	

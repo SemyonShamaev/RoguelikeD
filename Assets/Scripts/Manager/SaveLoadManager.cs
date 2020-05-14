@@ -103,7 +103,8 @@ public class SaveLoadManager :  Singleton<SaveLoadManager>
 
 	void OnApplicationQuit()
     {
-     	SaveGame();   
+    	if(SceneManager.GetActiveScene().name == "Game")
+     		SaveGame();   
     }
 }
 

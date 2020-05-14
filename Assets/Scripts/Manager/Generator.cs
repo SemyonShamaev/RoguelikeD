@@ -183,7 +183,7 @@ public class Generator : Singleton<Generator>
                 else if (tiles[i][j] == TileType.Wall)
                 {
                     Vector3 positionWall = new Vector3(i, j, 0f);
-                    GameObject wallInstance = Instantiate(wallTiles[SelectTileWall(i, j)], positionWall, Quaternion.identity) as GameObject;
+                    GameObject wallInstance = Instantiate(wallTiles[0], positionWall, Quaternion.identity) as GameObject;
                     wallInstance.transform.parent = transform;
                 }
                 else if(tiles[i][j] != TileType.Empty)
@@ -254,6 +254,7 @@ public class Generator : Singleton<Generator>
             GameObject tileChoice = tileArray[Random.Range(0, tileArray.Length)];
             enemies[i] = Instantiate(tileChoice, randomPosition, Quaternion.identity) as GameObject;
             enemies[i].transform.parent = transform;
+
             tiles[Mathf.RoundToInt(enemies[i].transform.position.x)][Mathf.RoundToInt(enemies[i].transform.position.y)] = TileType.Enemy;
 
             Invtr[i] = Instantiate(Inventory, transform.position, Quaternion.identity) as GameObject;
@@ -317,52 +318,6 @@ public class Generator : Singleton<Generator>
                tiles[xPos-1][yPos-1]!=TileType.CorridorFloor;
     }
 
-    private bool CheckCollision(int n)
-    {
-        for (int i = 0; i < n; i++)
-        {
-            if(rooms[i].xPos < rooms[n].xPos + rooms[n].roomWidth + 2 &&
-               rooms[n].xPos < rooms[i].xPos + rooms[i].roomWidth + 2 &&
-               rooms[i].yPos < rooms[n].yPos + rooms[n].roomHeight + 2 &&
-               rooms[n].yPos < rooms[i].yPos + rooms[i].roomHeight + 2)
-                    return true;
-        }
-        return false;
-    }
-
-    private int SelectTileWall(int x, int y)
-    {
-        if(tiles[x - 1][y] == TileType.Wall && tiles[x + 1][y] == TileType.Wall && (tiles[x][y - 1] == TileType.Floor || tiles[x][y - 1] == TileType.CorridorFloor))
-            return 0;
-        if(tiles[x][y - 1] == TileType.Wall && tiles[x][y + 1] == TileType.Wall && (tiles[x - 1][y] == TileType.Floor || tiles[x - 1][y] == TileType.CorridorFloor))
-            return 1;
-        if(tiles[x][y - 1] == TileType.Wall && tiles[x][y + 1] == TileType.Wall && (tiles[x + 1][y] == TileType.Floor || tiles[x + 1][y] == TileType.CorridorFloor))
-            return 2;
-        if(tiles[x - 1][y] == TileType.Wall && tiles[x + 1][y] == TileType.Wall && (tiles[x][y + 1] == TileType.Floor || tiles[x][y + 1] == TileType.CorridorFloor))
-            return 3;
-        if(tiles[x + 1][y] == TileType.Wall && tiles[x][y - 1] == TileType.Wall && tiles[x - 1][y] != TileType.CorridorFloor && tiles[x][y - 1] != TileType.CorridorFloor && tiles[x][y + 1] != TileType.CorridorFloor)
-            return 4;
-        if(tiles[x - 1][y] == TileType.Wall && tiles[x][y - 1] == TileType.Wall && tiles[x + 1][y] != TileType.CorridorFloor && tiles[x][y + 1] != TileType.CorridorFloor)
-            return 5;
-        if(tiles[x + 1][y] == TileType.Wall && tiles[x][y + 1] == TileType.Wall && tiles[x][y + 1] != TileType.CorridorFloor && tiles[x - 1][y] != TileType.CorridorFloor && tiles[x][y - 1] != TileType.CorridorFloor)
-            return 6;
-        if(tiles[x - 1][y] == TileType.Wall && tiles[x][y + 1] == TileType.Wall && tiles[x][y - 1] != TileType.CorridorFloor && tiles[x + 1][y] != TileType.CorridorFloor)
-            return 7;
-        if(tiles[x + 1][y] == TileType.Wall && tiles[x][y - 1] == TileType.Wall)
-            return 8;
-        if(tiles[x - 1][y] == TileType.Wall && tiles[x][y - 1] == TileType.Wall)
-            return 9;
-        if(tiles[x + 1][y] == TileType.Wall && tiles[x][y + 1] == TileType.Wall)
-            return 10;
-        if(tiles[x - 1][y] == TileType.Wall && tiles[x][y + 1] == TileType.Wall)
-            return 11;
-        return 0;
-    }
-
-
-
-
-
     public void LoadData(List<Save.MapSaveData> save)
     {
         gridPositions.Clear();
@@ -399,7 +354,7 @@ public class Generator : Singleton<Generator>
                 else if (tiles[i][j] == TileType.Wall)
                 {
                     Vector3 positionWall = new Vector3(i, j, 0f);
-                    GameObject wallInstance = Instantiate(wallTiles[SelectTileWall(i, j)], positionWall, Quaternion.identity) as GameObject;
+                    GameObject wallInstance = Instantiate(wallTiles[0], positionWall, Quaternion.identity) as GameObject;
                     wallInstance.transform.parent = transform;
                 }
                 else if(tiles[i][j] != TileType.Empty)

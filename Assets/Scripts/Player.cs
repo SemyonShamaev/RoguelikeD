@@ -8,7 +8,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 {
     public float speed;
     public int stepCount;
-    public Vector2 point;
+    public Vector3 point;
     public Slider HealthBar;
     public Vector3 stepPoint;
     public AudioClip getDamage;
@@ -16,13 +16,13 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public AudioClip EatSound;
     public bool isMoving = false;
     public bool isAnimation = false;
-    public Sprite[] sprites = new Sprite[4];
     public float currentLifes;
 
     private Camera cam;
-    private Animation anim;
     private float maxLifes = 10;
     private bool isDeath = false;
+    private Animator anim;
+    private SpriteRenderer sprite;
 
     public void OnPointerDown(PointerEventData eventData) { } 
     public void OnPointerUp(PointerEventData eventData)
@@ -30,8 +30,9 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         if(!GameManager.Instance.onPause)
         {
             point = Camera.main.ScreenToWorldPoint(new Vector3((int)Mathf.Round(eventData.position.x), (int)Mathf.Round(eventData.position.y), 0)); 
-            point = new Vector2((int)Mathf.Round(point.x), (int)Mathf.Round(point.y));
+            point = new Vector3((int)Mathf.Round(point.x), (int)Mathf.Round(point.y), 0);
             isMoving = true; 
+            ChangeSprite();
         }    
     }
 
@@ -39,21 +40,25 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     {
         currentLifes = maxLifes;
         stepPoint = transform.position;
-        anim = gameObject.GetComponent<Animation>();     
+        anim = GetComponent<Animator>();
+        sprite = GetComponent<SpriteRenderer>();
     }
 
     private void Update()
     {   
         if (isMoving)
             if(!isDeath)
-                Move();  
+                Move(); 
     }
 
     private void Move()
     {
         if(transform.position == stepPoint)
-            if(!isAnimation)
-                (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y); 
+        {
+            (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y);  
+            if(stepPoint != transform.position) 
+                GiveStepEnemies();   
+        }
 
         if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Enemy)
         {
@@ -94,12 +99,14 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
         else
         {
-            ChangeSprite();
+            if(!isAnimation && stepPoint != transform.position)
+            {
+                isAnimation = true;
+                anim.Play("PlayerWalking", 0, 0.1f);
+            }
+
             transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime);  
             Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
-
-            if(transform.position == stepPoint)
-                GiveStepEnemies();
         }  
     }
 
@@ -113,8 +120,8 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
                 y == Generator.Instance.enemies[i].transform.position.y)
             {
                 enemy.GetDamage(1);
-                ChangeSprite();
                 AudioManager.Instance.PlayEffects(PunchSound);
+                anim.Play("PlayerHit", 0, 0.1f);
             }
         }
     }
@@ -131,16 +138,14 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public void GetDamage(int l)
     {
         point = stepPoint;
-        anim.Play("GetDamage");
         AudioManager.Instance.PlayEffects(getDamage);
-
         currentLifes -= l;
         HealthBar.value = currentLifes / maxLifes;
 
         if(currentLifes <= 0)
         {
             isDeath = true;
-            anim.Play("Death");
+            anim.Play("PlayerDeath", 0, 0.1f);
             GameManager.Instance.GameOver();
         }
     }
@@ -153,18 +158,6 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             currentLifes++;
             HealthBar.value = currentLifes / maxLifes;
         }
-    }
-
-    private void ChangeSprite()
-    {
-        if(stepPoint.x > (int)transform.position.x)
-            GetComponent<SpriteRenderer>().sprite = sprites[0];
-        else if(stepPoint.x < (int)transform.position.x)
-            GetComponent<SpriteRenderer>().sprite = sprites[1];
-        else if(stepPoint.y > (int)transform.position.y)
-            GetComponent<SpriteRenderer>().sprite = sprites[2];
-        else if(stepPoint.y < (int)transform.position.y)
-            GetComponent<SpriteRenderer>().sprite = sprites[3];
     }
 
     private void OpenDrop()
@@ -280,6 +273,14 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         return (startX,startY);
     }
 
+    private void ChangeSprite()
+    {
+        if(point.x < transform.position.x)
+            sprite.flipX = true;
+        else
+            sprite.flipX = false;
+    }
+
     private void startAnimation()
     {
         isAnimation = true;
@@ -305,7 +306,6 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         if(currentLifes <= 0)
         {
             isDeath = true;
-            anim.Play("Death");
             GameManager.Instance.GameOver();
         }
     }
