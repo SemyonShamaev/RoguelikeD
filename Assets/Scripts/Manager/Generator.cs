@@ -156,8 +156,6 @@ public class Generator : Singleton<Generator>
             if (i == rooms.Length - 1) 
                 tiles[rooms[i].xPos + rooms[i].roomHeight/2][rooms[i].yPos + rooms[i].roomWidth/2] = TileType.End;
         }   
-
-
     }
 
     private void addInstance()
@@ -251,9 +249,15 @@ public class Generator : Singleton<Generator>
             int randomIndex = Random.Range(0, enemyPositions.Count);
             Vector3 randomPosition = enemyPositions[randomIndex];
             enemyPositions.RemoveAt(randomIndex);
-            GameObject tileChoice = tileArray[Random.Range(0, tileArray.Length)];
+
+            int type = Random.Range(0, tileArray.Length);
+            GameObject tileChoice = tileArray[type];
+
             enemies[i] = Instantiate(tileChoice, randomPosition, Quaternion.identity) as GameObject;
             enemies[i].transform.parent = transform;
+
+            Enemy enemy = enemies[i].GetComponent<Enemy>();
+            enemy.type = type;
 
             tiles[Mathf.RoundToInt(enemies[i].transform.position.x)][Mathf.RoundToInt(enemies[i].transform.position.y)] = TileType.Enemy;
 

@@ -16,10 +16,12 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public AudioClip EatSound;
     public bool isMoving = false;
     public bool isAnimation = false;
-    public float currentLifes;
+    public int currentLifes;
+    public int maxLifes;
+    public int minDamage;
+    public int maxDamage;
 
     private Camera cam;
-    private float maxLifes = 10;
     private bool isDeath = false;
     private Animator anim;
     private SpriteRenderer sprite;
@@ -38,7 +40,6 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     private void Start()
     {
-        currentLifes = maxLifes;
         stepPoint = transform.position;
         anim = GetComponent<Animator>();
         sprite = GetComponent<SpriteRenderer>();
@@ -119,7 +120,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             if(x == Generator.Instance.enemies[i].transform.position.x && 
                 y == Generator.Instance.enemies[i].transform.position.y)
             {
-                enemy.GetDamage(1);
+                enemy.GetDamage(Random.Range(minDamage, maxDamage));
                 AudioManager.Instance.PlayEffects(PunchSound);
                 anim.Play("PlayerHit", 0, 0.1f);
             }
@@ -137,11 +138,12 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     public void GetDamage(int l)
     {
+        //anim.Play("PlayerHurt", 0, 0.5f);
         point = stepPoint;
         AudioManager.Instance.PlayEffects(getDamage);
         currentLifes -= l;
-        HealthBar.value = currentLifes / maxLifes;
-
+        HealthBar.value = (float)currentLifes / (float)maxLifes;
+        GameManager.Instance.healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
         if(currentLifes <= 0)
         {
             isDeath = true;
@@ -298,16 +300,17 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         point = new Vector2(save.point.x, save.point.y);
         currentLifes = save.currentLifes;
         isMoving = save.isMoving;
-        isAnimation = save.isAnimation;
         Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
-
         HealthBar.value = currentLifes / maxLifes;
 
         if(currentLifes <= 0)
         {
             isDeath = true;
+            anim.Play("PlayerDeath", 0, 0.1f);
             GameManager.Instance.GameOver();
         }
+
+        isAnimation = false;
     }
 }
 

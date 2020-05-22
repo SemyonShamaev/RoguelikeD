@@ -9,7 +9,11 @@ public class Enemy : MonoBehaviour
 	public bool isStep = false;
     public bool isSleep = true;
     public Vector3 stepPoint;
-
+    public int minDamage;
+    public int maxDamage;
+    public bool canShoot;
+    public int type;
+    
 	private Vector3 playerPosition;
     private bool isDeath = false;
     private SpriteRenderer sprite;
@@ -33,6 +37,13 @@ public class Enemy : MonoBehaviour
 
             if(!isSleep)
             {
+                if(canShoot && dist < 4 && dist > 1)
+                    if(isStep)
+                    {
+                        HitPlayer();
+                        ChangeSprite();
+                    }
+
                 if(dist == 1)
                     if(isStep)
                         if(!Player.Instance.isAnimation)
@@ -40,7 +51,6 @@ public class Enemy : MonoBehaviour
 
                 if(isStep)
                     Move();
-
 
                 transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime);
             }
@@ -74,7 +84,7 @@ public class Enemy : MonoBehaviour
     {
         anim.Play("Hit", 0, 0.25f);
         stepPoint = transform.position;
-        Player.Instance.GetDamage(1);
+        Player.Instance.GetDamage(Random.Range(minDamage, maxDamage));
         isStep = false;
     }
 
@@ -82,17 +92,12 @@ public class Enemy : MonoBehaviour
     {
         anim.Play("Death", 0, 0.25f);
         isDeath = true;
-    	//enemy.SetActive(false); 
-        //GameObject dropEnemy = Instantiate(drop, transform.position, Quaternion.identity) as GameObject;
-       
-        //dropEnemy.transform.SetParent(GameManager.Instance.transform, false);
-        //dropEnemy.transform.position = transform.position;
        
     	Generator.Instance.tiles[(int)enemy.transform.position.x][(int)enemy.transform.position.y] = Generator.TileType.Drop;
     }
 
     public void GetDamage(int l)
-    {
+    {   
         lifes -= l;
 
         if(lifes <= 0)

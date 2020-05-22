@@ -19,6 +19,7 @@ public class GameManager : Singleton<GameManager>
 
    	public Text levelCount;
    	public Text goldCount;
+   	public Text healthCount;
 
 	public AudioClip BackgroundMusic;
 	public AudioClip DeathSound;
@@ -26,14 +27,13 @@ public class GameManager : Singleton<GameManager>
 
 	public bool onPause = false;
 
-	private Generator Generator;	
-
 	Animation TransitionAnim;
 
 	private void Start()
 	{
 		Application.targetFrameRate = 60;
 		AudioManager.Instance.PlayMusic(BackgroundMusic);
+		healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
 	}
 
 	
@@ -41,14 +41,12 @@ public class GameManager : Singleton<GameManager>
    	{
    		Time.timeScale = 1;
    		AudioManager.Instance.RestoreMusic();
-   		Generator = GetComponent<Generator>();
-
    		InitGame();
    	}
 
    	private void InitGame()
 	{
-		Generator.setupScene(level);
+		Generator.Instance.setupScene(level);
 	}
 
 	public void NewLevelMessage()

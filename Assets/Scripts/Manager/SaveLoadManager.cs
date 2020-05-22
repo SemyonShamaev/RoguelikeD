@@ -147,17 +147,16 @@ public class Save
 	{
 		public Vec3 position, stepPoint;
 		public Vec2 point;
-		public float currentLifes;
-		public bool isMoving, isAnimation;
+		public int currentLifes;
+		public bool isMoving;
 
-		public PlayerSaveData(Vec3 position, Vec3 stepPoint, Vec2 point, float currentLifes, bool isMoving, bool isAnimation)
+		public PlayerSaveData(Vec3 position, Vec3 stepPoint, Vec2 point, int currentLifes, bool isMoving)
 		{
 			this.position = position;
 			this.stepPoint = stepPoint;
 			this.point = point;
 			this.currentLifes = currentLifes;
 			this.isMoving = isMoving;
-			this.isAnimation = isAnimation;
 		}
 	}
 	public void SavePlayer()
@@ -167,10 +166,9 @@ public class Save
 		Vec3 position = new Vec3(Player.Instance.transform.position.x, Player.Instance.transform.position.y, Player.Instance.transform.position.z);
 		Vec3 stepPoint = new Vec3(player.stepPoint.x, player.stepPoint.y, player.stepPoint.z);
 		Vec2 point = new Vec2(player.point.x, player.point.y);
-		float currentLifes = player.currentLifes;
+		int currentLifes = player.currentLifes;
 		bool isMoving = player.isMoving;
-		bool isAnimation = player.isAnimation;
-		playerData = new PlayerSaveData(position, stepPoint, point, currentLifes, isMoving, isAnimation);
+		playerData = new PlayerSaveData(position, stepPoint, point, currentLifes, isMoving);
 	}
 
 	[System.Serializable]
