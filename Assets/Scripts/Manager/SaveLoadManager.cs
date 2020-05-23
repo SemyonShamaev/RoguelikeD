@@ -1,20 +1,21 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
+﻿using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using System.Collections;
+using UnityEngine;
+using System.IO;
 using Rogue;
 
-public class SaveLoadManager :  Singleton<SaveLoadManager>
+public class SaveLoadManager : Singleton<SaveLoadManager>
 {
 	private string filePath;
  	private Animation anim;
+
     private void Start()
     {
-    	DontDestroyOnLoad(this.gameObject);
     	filePath = Application.persistentDataPath + "/save.gamesave";
-    	anim = this.GetComponent<Animation>();
+    	DontDestroyOnLoad(this.gameObject);
+    	anim = GetComponent<Animation>();
     }
 
     public void SaveGame()
@@ -31,12 +32,10 @@ public class SaveLoadManager :  Singleton<SaveLoadManager>
    		save.SavePlayerInventory();
    		save.SaveContainersInventory();
    		save.SaveContainers();
-   		save.levelCount = GameManager.Instance.level;
-   		save.goldCount = int.Parse(GameManager.Instance.goldCount.text);
+        save.SaveGameManager();
    		save.SavePlayer();
 
    		bf.Serialize(fs, save);
-
    		fs.Close();
     }
 
@@ -51,7 +50,7 @@ public class SaveLoadManager :  Singleton<SaveLoadManager>
     	Save save = (Save)bf.Deserialize(fs);
     	fs.Close();
 
-    	Generator.Instance.GetComponent<Generator>().LoadData(save.mapData);
+    	Generator.Instance.LoadData(save.mapData);
 
     	int i = 0;
     	foreach(var enemy in save.enemiesData)
@@ -89,11 +88,8 @@ public class SaveLoadManager :  Singleton<SaveLoadManager>
     	
 
     	Inventory.Instance.GetComponent<Inventory>().LoadData(save.inventoryData);
-
     	Player.Instance.GetComponent<Player>().LoadData(save.playerData);
-
-    	GameManager.Instance.level = save.levelCount;
-   		GameManager.Instance.goldCount.text = (save.goldCount).ToString();
+    	GameManager.Instance.LoadData(save.gameManagerData);
     }
 
     public void Load()
@@ -101,7 +97,7 @@ public class SaveLoadManager :  Singleton<SaveLoadManager>
 		anim.Play("Load");
 	}
 
-	void OnApplicationQuit()
+	private void OnApplicationQuit()
     {
     	if(SceneManager.GetActiveScene().name == "Game")
      		SaveGame();   
@@ -111,16 +107,14 @@ public class SaveLoadManager :  Singleton<SaveLoadManager>
 [System.Serializable]
 public class Save
 {
-	public List<EnemySaveData> enemiesData = new List<EnemySaveData>();
 	public PlayerSaveData playerData = new PlayerSaveData();
+    public GameManagerSaveData gameManagerData = new GameManagerSaveData();
+	public List<MapSaveData> mapData = new List<MapSaveData>();
+	public List<EnemySaveData> enemiesData = new List<EnemySaveData>();
+	public List<ContainersSaveData> containersData = new List<ContainersSaveData>();
 	public List<PlayerInventorySaveData> inventoryData = new List<PlayerInventorySaveData>();
 	public List<EnemyInventorySaveData> enemyInventoryData = new List<EnemyInventorySaveData>();
 	public List<ContainersInventorySaveData> containersInventoryData = new List<ContainersInventorySaveData>();
-	public List<MapSaveData> mapData = new List<MapSaveData>();
-	public List<ContainersSaveData> containersData = new List<ContainersSaveData>();
-
-	public int levelCount;
-	public int goldCount;
 
 	[System.Serializable]
 	public struct ContainersSaveData
@@ -132,7 +126,6 @@ public class Save
 			this.position = position;
 		}
 	}
-
 	public void SaveContainers()
 	{
 		foreach(var cont in Generator.Instance.containers)
@@ -273,39 +266,55 @@ public class Save
 		}
 	}
 
-
 	[System.Serializable]
 	public struct MapSaveData
 	{
 		public int tiles;
 		public int enemyCount, containersCount;
-		public MapSaveData(int tiles, int enemyCount, int containersCount)
+        public int[] enemyTypes;
+		public MapSaveData(int tiles, int enemyCount, int containersCount, int[] enemyTypes)
 		{
 			this.tiles = tiles;
 			this.enemyCount = enemyCount;
 			this.containersCount = containersCount;
+            this.enemyTypes = enemyTypes;
 		}
 	}
-
 	public void SaveMap()
 	{
 		int enemyCount = Generator.Instance.enemies.Length;
 		int containersCount = Generator.Instance.containers.Length;
+        int[] enemyTypes = Generator.Instance.enemyTypes;
 
 		for(int i = 0; i < Generator.Instance.MapColumns; i++)
 		{
 			for(int j = 0; j < Generator.Instance.MapRows; j++)
 			{
 				int tiles = (int)Generator.Instance.tiles[i][j];
-				mapData.Add(new MapSaveData(tiles, enemyCount, containersCount));
+				mapData.Add(new MapSaveData(tiles, enemyCount, containersCount, enemyTypes));
 			}
 		}
 	}
 
+    [System.Serializable]
+    public struct GameManagerSaveData
+    {
+        public int levelCount;
+        public int goldCount;
+        public GameManagerSaveData(int levelCount, int goldCount)
+        {
+            this.levelCount = levelCount;
+            this.goldCount = goldCount;
+        }
+    }
+    public void SaveGameManager()
+    {
+        int levelCount = GameManager.Instance.level;
+        int goldCount = GameManager.Instance.gold;
+        gameManagerData = new GameManagerSaveData(levelCount, goldCount);
+    }
 
-
-
-	[System.Serializable]
+    [System.Serializable]
 	public struct Vec3
 	{
 		public float x,y,z;
@@ -329,7 +338,6 @@ public class Save
 			this.y = y;
 		}
 	}
-
 }
 
 

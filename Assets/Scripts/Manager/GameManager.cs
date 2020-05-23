@@ -8,9 +8,9 @@ using Rogue;
 public class GameManager : Singleton<GameManager>
 {
    	public int level = 1;
+    public int gold = 0;
 
    	public GameObject Canvas;
-
    	public GameObject GameOverPanel;
    	public GameObject NextLevelPanel;
    	public GameObject PausePanel;
@@ -27,27 +27,22 @@ public class GameManager : Singleton<GameManager>
 
 	public bool onPause = false;
 
-	Animation TransitionAnim;
+	private Animation TransitionAnim;
 
 	private void Start()
 	{
 		Application.targetFrameRate = 60;
 		AudioManager.Instance.PlayMusic(BackgroundMusic);
-		healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
+		healthCount.text = Player.Instance.currentLifes.ToString() + 
+            "/" + Player.Instance.maxLifes.ToString();
 	}
 
-	
    	private void Awake()
    	{
    		Time.timeScale = 1;
    		AudioManager.Instance.RestoreMusic();
-   		InitGame();
-   	}
-
-   	private void InitGame()
-	{
-		Generator.Instance.setupScene(level);
-	}
+        Generator.Instance.setupScene(level);
+    }
 
 	public void NewLevelMessage()
 	{
@@ -126,7 +121,17 @@ public class GameManager : Singleton<GameManager>
 
 	public void addGold(int GoldCount)
 	{
-		goldCount.text = (int.Parse(goldCount.text) + GoldCount).ToString();
+        gold += GoldCount;
+		goldCount.text = gold.ToString();
 		AudioManager.Instance.PlayEffects(soundOfGold);
 	}
+
+	public void LoadData(Save.GameManagerSaveData save)
+    {
+        gold = save.goldCount;
+        level = save.levelCount;
+        goldCount.text = gold.ToString();
+        levelCount.text = level.ToString();
+        healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
+    }
 }

@@ -7,23 +7,28 @@ using Rogue;
 public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler 
 {
     public float speed;
-    public int stepCount;
+ 
     public Vector3 point;
-    public Slider HealthBar;
     public Vector3 stepPoint;
+
+    public Slider HealthBar;
+  
     public AudioClip getDamage;
     public AudioClip PunchSound;
     public AudioClip EatSound;
+
     public bool isMoving = false;
     public bool isAnimation = false;
+
+    public int stepCount;
     public int currentLifes;
     public int maxLifes;
     public int minDamage;
     public int maxDamage;
 
     private Camera cam;
-    private bool isDeath = false;
     private Animator anim;
+    private bool isDeath = false;
     private SpriteRenderer sprite;
 
     public void OnPointerDown(PointerEventData eventData) { } 
@@ -56,7 +61,11 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     {
         if(transform.position == stepPoint)
         {
+            if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.End)
+                GameManager.Instance.NewLevelMessage();
+
             (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y);  
+
             if(stepPoint != transform.position) 
                 GiveStepEnemies();   
         }
@@ -115,7 +124,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     {
         for(int i = 0; i < Generator.Instance.enemies.Length; i++)
         {
-            Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>(); // использовать наблюдателя
+            Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>(); 
             enemy.isStep = true;
             if(x == Generator.Instance.enemies[i].transform.position.x && 
                 y == Generator.Instance.enemies[i].transform.position.y)
@@ -138,7 +147,6 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     public void GetDamage(int l)
     {
-        //anim.Play("PlayerHurt", 0, 0.5f);
         point = stepPoint;
         AudioManager.Instance.PlayEffects(getDamage);
         currentLifes -= l;
@@ -174,22 +182,22 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         }
     }
 
-    private (int a, int b) FindWave(int startX, int startY, int targetX, int targetY) //Волновой алгоритм
+    private (int a, int b) FindWave(int startX, int startY, int targetX, int targetY) 
     {
         int x, y,step=0;
         int stepX = 0, stepY = 0;
         int[,] cMap = new int[Generator.Instance.MapColumns, Generator.Instance.MapRows];
 
-        for (x = 0; x < Generator.Instance.MapColumns; x++) //заполнение массива числами
+        for (x = 0; x < Generator.Instance.MapColumns; x++) 
             for (y = 0; y < Generator.Instance.MapRows; y++)
             {
                 if (Generator.Instance.tiles[x][y] != Generator.TileType.Floor && 
                     Generator.Instance.tiles[x][y] != Generator.TileType.CorridorFloor && 
                     Generator.Instance.tiles[x][y] != Generator.TileType.End  && 
                     Generator.Instance.tiles[x][y] != Generator.TileType.Drop)
-                    cMap[x, y] = -2; //есть препятствие
+                    cMap[x, y] = -2;
                 else
-                    cMap[x, y] = -1; //путь свободен
+                    cMap[x, y] = -1; 
             }
 
         
@@ -199,9 +207,9 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             return (startX, startY);
         }
 
-        cMap[targetX,targetY]=0; //отсчет начинается с конечной точки
+        cMap[targetX,targetY]=0; 
 
-        while (true) //поиск пути
+        while (true)
         {
             for (x = startX - 8; x < startX + 8; x++)
                 for (y = startY - 8; y < startY + 8; y++)
@@ -226,9 +234,9 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
                     }
                 }
             step++;
-            if (cMap[startX, startY] != -1) //удалось найти путь
+            if (cMap[startX, startY] != -1)
                 break;
-            if (step > 20 * 20){ //если путь не удалось найти = возвращает стартовую точку
+            if (step > 20 * 20){
                 isMoving = false;
                 return (startX, startY);
             }
@@ -301,7 +309,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         currentLifes = save.currentLifes;
         isMoving = save.isMoving;
         Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
-        HealthBar.value = currentLifes / maxLifes;
+        HealthBar.value = (float)currentLifes / (float)maxLifes;
 
         if(currentLifes <= 0)
         {

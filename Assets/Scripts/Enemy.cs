@@ -2,19 +2,21 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-	public int lifes;
-	public float speed;
-	public GameObject enemy;
-    public GameObject drop;
-	public bool isStep = false;
-    public bool isSleep = true;
-    public Vector3 stepPoint;
+    public float speed;
+
+    public int lifes;
     public int minDamage;
     public int maxDamage;
+
+	public GameObject enemy;
+    public GameObject drop;
+
+	public bool isStep;
+    public bool isSleep;
     public bool canShoot;
-    public int type;
-    
-	private Vector3 playerPosition;
+
+    public Vector3 stepPoint;
+
     private bool isDeath = false;
     private SpriteRenderer sprite;
     private Animator anim;
@@ -31,7 +33,6 @@ public class Enemy : MonoBehaviour
         if(!isDeath)
         {
             float dist = Vector3.Distance(Player.Instance.transform.position, transform.position);
-        
             if(dist < 4 && isSleep)
                 isSleep = false;
 
@@ -44,10 +45,9 @@ public class Enemy : MonoBehaviour
                         ChangeSprite();
                     }
 
-                if(dist == 1)
-                    if(isStep)
-                        if(!Player.Instance.isAnimation)
-                            HitPlayer();
+                if (Vector3.Distance(Player.Instance.stepPoint, transform.position) < 2)
+                    if (isStep)
+                        HitPlayer();
 
                 if(isStep)
                     Move();
@@ -86,13 +86,13 @@ public class Enemy : MonoBehaviour
         stepPoint = transform.position;
         Player.Instance.GetDamage(Random.Range(minDamage, maxDamage));
         isStep = false;
+        ChangeSprite();
     }
 
     private void Death()
     {
         anim.Play("Death", 0, 0.25f);
         isDeath = true;
-       
     	Generator.Instance.tiles[(int)enemy.transform.position.x][(int)enemy.transform.position.y] = Generator.TileType.Drop;
     }
 
