@@ -6,7 +6,6 @@ using Rogue;
 
 public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler 
 {
-    public float speed;
  
     public Vector3 point;
     public Vector3 stepPoint;
@@ -25,6 +24,8 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public int maxLifes;
     public int minDamage;
     public int maxDamage;
+    public int levelLimit;
+    public int currentExp;
 
     private Camera cam;
     private Animator anim;
@@ -34,7 +35,10 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public void OnPointerDown(PointerEventData eventData) { } 
     public void OnPointerUp(PointerEventData eventData)
     {   
-        if(!GameManager.Instance.onPause)
+        if(isMoving)
+            point = stepPoint;
+
+        else if(!GameManager.Instance.onPause)
         {
             point = Camera.main.ScreenToWorldPoint(new Vector3((int)Mathf.Round(eventData.position.x), (int)Mathf.Round(eventData.position.y), 0)); 
             point = new Vector3((int)Mathf.Round(point.x), (int)Mathf.Round(point.y), 0);
@@ -115,7 +119,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
                 anim.Play("PlayerWalking", 0, 0.1f);
             }
 
-            transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime);  
+            transform.position = Vector2.MoveTowards(transform.position, stepPoint, GameManager.Instance.gameSpeed * Time.deltaTime);  
             Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
         }  
     }
@@ -126,10 +130,23 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         {
             Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>(); 
             enemy.isStep = true;
+
             if(x == Generator.Instance.enemies[i].transform.position.x && 
                 y == Generator.Instance.enemies[i].transform.position.y)
             {
-                enemy.GetDamage(Random.Range(minDamage, maxDamage));
+                int damage = Random.Range(minDamage, maxDamage);
+
+                if (Generator.Instance.tiles[(int)transform.position.x + 1][(int)transform.position.y] == Generator.TileType.Enemy)
+                    GameManager.Instance.spawnHitText(220, 0, damage);
+                else if (Generator.Instance.tiles[(int)transform.position.x][(int)transform.position.y - 1] == Generator.TileType.Enemy)
+                    GameManager.Instance.spawnHitText(0, -220, damage);
+                else if (Generator.Instance.tiles[(int)transform.position.x - 1][(int)transform.position.y] == Generator.TileType.Enemy)
+                   GameManager.Instance.spawnHitText(-220, 0, damage);
+                else if (Generator.Instance.tiles[(int)transform.position.x][(int)transform.position.y + 1] == Generator.TileType.Enemy)
+                   GameManager.Instance.spawnHitText(0, 220, damage);
+
+                enemy.GetDamage(damage);
+
                 AudioManager.Instance.PlayEffects(PunchSound);
                 anim.Play("PlayerHit", 0, 0.1f);
             }
@@ -148,11 +165,16 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public void GetDamage(int l)
     {
         point = stepPoint;
+
         AudioManager.Instance.PlayEffects(getDamage);
+
         currentLifes -= l;
         HealthBar.value = (float)currentLifes / (float)maxLifes;
+
         GameManager.Instance.healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
-        if(currentLifes <= 0)
+        GameManager.Instance.spawnHitText(0, 0, l);
+
+        if (currentLifes <= 0)
         {
             isDeath = true;
             anim.Play("PlayerDeath", 0, 0.1f);
@@ -166,10 +188,27 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         if(currentLifes != maxLifes)
         {
             currentLifes++;
-            HealthBar.value = currentLifes / maxLifes;
+            HealthBar.value = (float)currentLifes / (float)maxLifes;
+            GameManager.Instance.healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
         }
     }
 
+    public void getExp(int expCount)
+    {
+        currentExp += expCount;
+        if(currentExp >= levelLimit)
+        {
+            currentExp -= levelLimit;
+            GameManager.Instance.playerLevel++;
+            GameManager.Instance.playerLevelCount.text = GameManager.Instance.playerLevel.ToString();
+            currentLifes = maxLifes;
+            HealthBar.value = 1;
+            GameManager.Instance.healthCount.text = "100/100";
+            levelLimit += 50;
+            GameManager.Instance.UpLevel();
+        }
+    }
+        
     private void OpenDrop()
     {
         for(int i = 0; i < Generator.Instance.enemies.Length; i++)
@@ -306,8 +345,12 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         transform.position = new Vector3(save.position.x, save.position.y, save.position.z);
         stepPoint = new Vector3(save.stepPoint.x, save.stepPoint.y, save.stepPoint.z);
         point = new Vector2(save.point.x, save.point.y);
+
         currentLifes = save.currentLifes;
+        levelLimit = save.levelLimit;
+        currentExp = save.currentExp;
         isMoving = save.isMoving;
+
         Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
         HealthBar.value = (float)currentLifes / (float)maxLifes;
 

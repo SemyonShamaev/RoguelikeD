@@ -141,14 +141,18 @@ public class Save
 		public Vec3 position, stepPoint;
 		public Vec2 point;
 		public int currentLifes;
+        public int levelLimit;
+        public int currentExp;
 		public bool isMoving;
 
-		public PlayerSaveData(Vec3 position, Vec3 stepPoint, Vec2 point, int currentLifes, bool isMoving)
+		public PlayerSaveData(Vec3 position, Vec3 stepPoint, Vec2 point, int currentLifes, int levelLimit, int currentExp, bool isMoving)
 		{
 			this.position = position;
 			this.stepPoint = stepPoint;
 			this.point = point;
 			this.currentLifes = currentLifes;
+            this.levelLimit = levelLimit;
+            this.currentExp = currentExp;
 			this.isMoving = isMoving;
 		}
 	}
@@ -160,8 +164,10 @@ public class Save
 		Vec3 stepPoint = new Vec3(player.stepPoint.x, player.stepPoint.y, player.stepPoint.z);
 		Vec2 point = new Vec2(player.point.x, player.point.y);
 		int currentLifes = player.currentLifes;
+        int levelLimit = player.levelLimit;
+        int currentExp = player.currentExp;
 		bool isMoving = player.isMoving;
-		playerData = new PlayerSaveData(position, stepPoint, point, currentLifes, isMoving);
+		playerData = new PlayerSaveData(position, stepPoint, point, currentLifes, levelLimit, currentExp, isMoving);
 	}
 
 	[System.Serializable]
@@ -301,17 +307,20 @@ public class Save
     {
         public int levelCount;
         public int goldCount;
-        public GameManagerSaveData(int levelCount, int goldCount)
+        public int playerLevel;
+        public GameManagerSaveData(int levelCount, int goldCount, int playerLevel)
         {
             this.levelCount = levelCount;
             this.goldCount = goldCount;
+            this.playerLevel = playerLevel;
         }
     }
     public void SaveGameManager()
     {
         int levelCount = GameManager.Instance.level;
         int goldCount = GameManager.Instance.gold;
-        gameManagerData = new GameManagerSaveData(levelCount, goldCount);
+        int playerLevel = GameManager.Instance.playerLevel;
+        gameManagerData = new GameManagerSaveData(levelCount, goldCount, playerLevel);
     }
 
     [System.Serializable]

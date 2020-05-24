@@ -201,7 +201,7 @@ public class Generator : Singleton<Generator>
                     gridPositions.Add(new Vector3(i, j));
 
                 else if(tiles[i][j] == TileType.Floor || tiles[i][j] == TileType.CorridorFloor)
-                    if(tiles[i][j] != TileType.End && tiles[i][j] != TileType.Start)
+                    if(tiles[i][j] != TileType.End || tiles[i][j] != TileType.Start)
                         enemyPositions.Add(new Vector3(i,j));
             }
         }

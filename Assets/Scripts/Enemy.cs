@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    public float speed;
 
     public int lifes;
     public int minDamage;
     public int maxDamage;
+    public int expCount;
 
 	public GameObject enemy;
     public GameObject drop;
@@ -47,12 +47,13 @@ public class Enemy : MonoBehaviour
 
                 if (Vector3.Distance(Player.Instance.stepPoint, transform.position) < 2)
                     if (isStep)
-                        HitPlayer();
+                        if(Player.Instance.stepPoint.x % 1 == 0 && Player.Instance.stepPoint.y % 1 == 0)
+                            HitPlayer();
 
                 if(isStep)
                     Move();
 
-                transform.position = Vector2.MoveTowards(transform.position, stepPoint, speed * Time.deltaTime);
+                transform.position = Vector2.MoveTowards(transform.position, stepPoint, GameManager.Instance.gameSpeed * Time.deltaTime);
             }
         }
     }
@@ -94,6 +95,8 @@ public class Enemy : MonoBehaviour
         anim.Play("Death", 0, 0.25f);
         isDeath = true;
     	Generator.Instance.tiles[(int)enemy.transform.position.x][(int)enemy.transform.position.y] = Generator.TileType.Drop;
+        sprite.sortingOrder = 1;
+        Player.Instance.getExp(expCount); 
     }
 
     public void GetDamage(int l)

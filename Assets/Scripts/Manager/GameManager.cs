@@ -9,6 +9,8 @@ public class GameManager : Singleton<GameManager>
 {
    	public int level = 1;
     public int gold = 0;
+    public int playerLevel;
+    public float gameSpeed;
 
    	public GameObject Canvas;
    	public GameObject GameOverPanel;
@@ -16,25 +18,32 @@ public class GameManager : Singleton<GameManager>
    	public GameObject PausePanel;
    	public GameObject SettingsPanel;
    	public GameObject InventoryPlayerPanel;
+    public GameObject UpLevelMessage;
+    public GameObject HitParent, HitTextPrefab;
+    public GameObject PlayerUpButton;
 
    	public Text levelCount;
    	public Text goldCount;
    	public Text healthCount;
+    public Text playerLevelCount;
 
 	public AudioClip BackgroundMusic;
 	public AudioClip DeathSound;
 	public AudioClip soundOfGold;
+    public AudioClip soundOfUpLevel;
 
 	public bool onPause = false;
 
 	private Animation TransitionAnim;
+    private Camera cam;
 
-	private void Start()
+    private void Start()
 	{
 		Application.targetFrameRate = 60;
 		AudioManager.Instance.PlayMusic(BackgroundMusic);
 		healthCount.text = Player.Instance.currentLifes.ToString() + 
             "/" + Player.Instance.maxLifes.ToString();
+        playerLevelCount.text = playerLevel.ToString();
 	}
 
    	private void Awake()
@@ -44,12 +53,25 @@ public class GameManager : Singleton<GameManager>
         Generator.Instance.setupScene(level);
     }
 
+    private void Update()
+    {
+        foreach (Transform child in HitParent.transform)
+            child.gameObject.transform.position = Vector2.MoveTowards(child.gameObject.transform.position, new Vector3(child.gameObject.transform.position.x, child.gameObject.transform.position.y + 1000, 0), gameSpeed * Time.deltaTime / 2);
+    }
+
 	public void NewLevelMessage()
 	{
 		NextLevelPanel.SetActive(true);
 		onPause = true;
 		Time.timeScale = 0;
 	}
+
+    public void UpLevel()
+    {
+        UpLevelMessage.SetActive(true);
+        AudioManager.Instance.PlayEffects(soundOfUpLevel);
+        PlayerUpButton.SetActive(true);
+    }
 
 	public void PauseGame()
 	{
@@ -83,6 +105,12 @@ public class GameManager : Singleton<GameManager>
 		onPause = true;
 		InventoryPlayerPanel.SetActive(!InventoryPlayerPanel.activeSelf);
 	}
+
+    public void OpenUpPlayerPanel()
+    {
+        UpLevelMessage.SetActive(false);
+        PlayerUpButton.SetActive(false);
+    }
 
 	public void ToNewLevel()
 	{
@@ -126,12 +154,21 @@ public class GameManager : Singleton<GameManager>
 		AudioManager.Instance.PlayEffects(soundOfGold);
 	}
 
+    public void spawnHitText(int x, int y, int damageCount)
+    {
+        GameObject HitText = Instantiate(HitTextPrefab, new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+        HitText.transform.SetParent(HitParent.transform, false);
+        HitText.GetComponent<Text>().text = damageCount.ToString();
+    }
+
 	public void LoadData(Save.GameManagerSaveData save)
     {
         gold = save.goldCount;
         level = save.levelCount;
+        playerLevel = save.playerLevel;
         goldCount.text = gold.ToString();
         levelCount.text = level.ToString();
+        playerLevelCount.text = playerLevel.ToString();
         healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
     }
 }
