@@ -234,7 +234,7 @@ public class Generator : Singleton<Generator>
             int ItemId;
             for(int j = 0; j < InventoryContainers.maxCount; j++)
             {
-                ItemId = Random.Range(0, 3);
+                ItemId = Random.Range(0, 18);
                 InventoryContainers.AddItem(j, DataBase.Instance.items[ItemId], Random.Range(1,5), DataBase.Instance.items[ItemId].type);
             } 
         }

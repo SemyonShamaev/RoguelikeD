@@ -4,10 +4,14 @@ using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
 using System.IO;
+using UnityEngine.UI;
 using Rogue;
 
 public class SaveLoadManager : Singleton<SaveLoadManager>
 {
+    public Slider musicSlider;
+    public Slider effectsSlider;
+
 	private string filePath;
  	private Animation anim;
 
@@ -16,6 +20,8 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
     	filePath = Application.persistentDataPath + "/save.gamesave";
     	DontDestroyOnLoad(this.gameObject);
     	anim = GetComponent<Animation>();
+        musicSlider.GetComponent<Sliders>().setSettings();
+        effectsSlider.GetComponent<Sliders>().setSettings();
     }
 
     public void SaveGame()
@@ -143,9 +149,14 @@ public class Save
 		public int currentLifes;
         public int levelLimit;
         public int currentExp;
+        public int skillPoints;
+        public int attack;
+        public int defense;
+        public int agility;
+        public int stamina;
 		public bool isMoving;
 
-		public PlayerSaveData(Vec3 position, Vec3 stepPoint, Vec2 point, int currentLifes, int levelLimit, int currentExp, bool isMoving)
+		public PlayerSaveData(Vec3 position, Vec3 stepPoint, Vec2 point, int currentLifes, int levelLimit, int currentExp, int skillPoints, int attack, int defense, int agility, int stamina, bool isMoving)
 		{
 			this.position = position;
 			this.stepPoint = stepPoint;
@@ -153,6 +164,11 @@ public class Save
 			this.currentLifes = currentLifes;
             this.levelLimit = levelLimit;
             this.currentExp = currentExp;
+            this.skillPoints = skillPoints;
+            this.attack = attack;
+            this.defense = defense;
+            this.agility = agility;
+            this.stamina = stamina;
 			this.isMoving = isMoving;
 		}
 	}
@@ -166,8 +182,13 @@ public class Save
 		int currentLifes = player.currentLifes;
         int levelLimit = player.levelLimit;
         int currentExp = player.currentExp;
+        int skillPoints = player.skillPoints;
+        int attack = player.attack;
+        int defense = player.defense;
+        int agility = player.agility;
+        int stamina = player.stamina;
 		bool isMoving = player.isMoving;
-		playerData = new PlayerSaveData(position, stepPoint, point, currentLifes, levelLimit, currentExp, isMoving);
+		playerData = new PlayerSaveData(position, stepPoint, point, currentLifes, levelLimit, currentExp, skillPoints, attack, defense, agility, stamina, isMoving);
 	}
 
 	[System.Serializable]
@@ -308,11 +329,13 @@ public class Save
         public int levelCount;
         public int goldCount;
         public int playerLevel;
-        public GameManagerSaveData(int levelCount, int goldCount, int playerLevel)
+        public bool levelUp;
+        public GameManagerSaveData(int levelCount, int goldCount, int playerLevel, bool levelUp)
         {
             this.levelCount = levelCount;
             this.goldCount = goldCount;
             this.playerLevel = playerLevel;
+            this.levelUp = levelUp;
         }
     }
     public void SaveGameManager()
@@ -320,7 +343,8 @@ public class Save
         int levelCount = GameManager.Instance.level;
         int goldCount = GameManager.Instance.gold;
         int playerLevel = GameManager.Instance.playerLevel;
-        gameManagerData = new GameManagerSaveData(levelCount, goldCount, playerLevel);
+        bool levelUp = GameManager.Instance.UpLevelMessage.activeSelf;
+        gameManagerData = new GameManagerSaveData(levelCount, goldCount, playerLevel, levelUp);
     }
 
     [System.Serializable]

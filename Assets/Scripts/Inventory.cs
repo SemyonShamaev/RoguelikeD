@@ -28,15 +28,16 @@ public class Inventory : Singleton<Inventory>
 		if(items.Count == 0)
 			addGraphics();
 
-		UpdateInventory();
+        AddItem(0, DataBase.Instance.items[1], 100, DataBase.Instance.items[1].type);
+        AddItem(1, DataBase.Instance.items[4], 1, DataBase.Instance.items[4].type);
+        AddItem(2, DataBase.Instance.items[9], 1, DataBase.Instance.items[9].type);
+        UpdateInventory();
 	}
 
 	public void Update()
 	{
 		if(currentID != -1 && !GameManager.Instance.onPause)
-		{
 			MoveObject();
-		}
 	}
 
   	public void AddItem(int id, Item item, int count, DataBase.ItemType type)
@@ -47,21 +48,10 @@ public class Inventory : Singleton<Inventory>
 
    		items[id].itemGameObj.GetComponent<Image>().sprite = item.image;
 
-		if(count > 1 && item.id != 0)
-			items[id].itemGameObj.GetComponentInChildren<Text>().text = count.ToString();
-		else
-			items[id].itemGameObj.GetComponentInChildren<Text>().text = "";
-	}
-
-   public void AddInventoryItem(int id, ItemInventory invItem)
-	{
-		items[id].id = invItem.id;
-		items[id].count = invItem.count;
-		items[id].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[invItem.id].image;
-		if(invItem.count > 1 && invItem.id != 0)
-			items[id].itemGameObj.GetComponentInChildren<Text>().text = invItem.count.ToString();
- 		else
-   		items[id].itemGameObj.GetComponentInChildren<Text>().text = "";
+        if (count > 1)
+            items[id].itemGameObj.GetComponentInChildren<Text>().text = count.ToString();
+        else
+            items[id].itemGameObj.GetComponentInChildren<Text>().text = "";
 	}
 
     public void addGraphics()
@@ -82,10 +72,10 @@ public class Inventory : Singleton<Inventory>
 			newItem.GetComponentInChildren<RectTransform>().localScale = new Vector3(1,1,1);
 
 			Button tempButton = newItem.GetComponent<Button>();
-
+  
 			tempButton.onClick.AddListener(delegate { SelectObject(); });
 
-			items.Add(ii);
+            items.Add(ii);
 		}
 	}
 
@@ -98,8 +88,14 @@ public class Inventory : Singleton<Inventory>
    			if(items[currentID].type == DataBase.ItemType.Food)
    			{
    				items[currentID].count--;
-   				Player.Instance.HealPlayer();
+   				Player.Instance.EatPlayer(DataBase.Instance.items[items[currentID].id].healthRecovery, DataBase.Instance.items[items[currentID].id].satietyRecovery);
    			}
+
+            if(items[currentID].type == DataBase.ItemType.Potion)
+            {
+                items[currentID].count--;
+                Player.Instance.DrinkPotion(DataBase.Instance.items[items[currentID].id].name);
+            }
 
    			currentID = -1;
    			UpdateInventory();
@@ -111,9 +107,11 @@ public class Inventory : Singleton<Inventory>
 		for(int i = 0; i < maxCount; i++)
  		{
  			items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[items[i].id].image;
-			if(items[i].id != 0 && items[i].count > 0)
+			if(items[i].count > 1)
    				items[i].itemGameObj.GetComponentInChildren<Text>().text = items[i].count.ToString();
-   			else
+            else if(items[i].count == 1)
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = "";
+            else
    			{
    				items[i].itemGameObj.GetComponentInChildren<Text>().text = "";
    				items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[0].image;

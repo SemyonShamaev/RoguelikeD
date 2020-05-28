@@ -10,16 +10,19 @@ public class DataBase : Singleton<DataBase>
 
 	public enum ItemType 
 	{
-    	Empty, Gold, Food, Weapon
+    	Empty, Gold, Food, Weapon, Shield, Potion
 	}
 }
 
 [System.Serializable]
-
 public class Item
 {
 	public int id;
 	public string name;
 	public Sprite image;
 	public DataBase.ItemType type;
+    public int healthRecovery;
+    public int satietyRecovery;
+    public int damage;
+    public int defense;
 }

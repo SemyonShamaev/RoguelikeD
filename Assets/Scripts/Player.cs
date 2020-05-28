@@ -11,21 +11,30 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public Vector3 stepPoint;
 
     public Slider HealthBar;
+    public Slider SatietyBar;
   
     public AudioClip getDamage;
     public AudioClip PunchSound;
     public AudioClip EatSound;
+    public AudioClip DrinkPotionSound;
 
-    public bool isMoving = false;
-    public bool isAnimation = false;
+    public bool isMoving;
+    public bool isAnimation;
 
-    public int stepCount;
     public int currentLifes;
     public int maxLifes;
-    public int minDamage;
-    public int maxDamage;
+
+    public int currentSatiety;
+    public int maxSatiety;
+
     public int levelLimit;
     public int currentExp;
+
+    public int skillPoints;
+    public int attack;
+    public int defense;
+    public int agility;
+    public int stamina;
 
     private Camera cam;
     private Animator anim;
@@ -42,8 +51,10 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         {
             point = Camera.main.ScreenToWorldPoint(new Vector3((int)Mathf.Round(eventData.position.x), (int)Mathf.Round(eventData.position.y), 0)); 
             point = new Vector3((int)Mathf.Round(point.x), (int)Mathf.Round(point.y), 0);
-            isMoving = true; 
+            isMoving = true;
+            (stepPoint.x, stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y);
             ChangeSprite();
+            GiveStepEnemies();
         }    
     }
 
@@ -71,7 +82,20 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y);  
 
             if(stepPoint != transform.position) 
-                GiveStepEnemies();   
+                GiveStepEnemies();
+
+            currentSatiety--;
+
+            if (currentSatiety < 0)
+            {
+                currentSatiety = 0;
+                currentLifes--;
+                if(currentLifes <= 0)
+                    GameManager.Instance.GameOver();
+
+            }
+
+            updateBars(0, 0);
         }
 
         if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Enemy)
@@ -134,7 +158,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             if(x == Generator.Instance.enemies[i].transform.position.x && 
                 y == Generator.Instance.enemies[i].transform.position.y)
             {
-                int damage = Random.Range(minDamage, maxDamage);
+                int damage = Random.Range(attack - 4, attack + 4);
 
                 if (Generator.Instance.tiles[(int)transform.position.x + 1][(int)transform.position.y] == Generator.TileType.Enemy)
                     GameManager.Instance.spawnHitText(220, 0, damage);
@@ -164,33 +188,82 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     public void GetDamage(int l)
     {
-        point = stepPoint;
+        int accuracy = Random.Range(0, 200);
 
-        AudioManager.Instance.PlayEffects(getDamage);
-
-        currentLifes -= l;
-        HealthBar.value = (float)currentLifes / (float)maxLifes;
-
-        GameManager.Instance.healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
-        GameManager.Instance.spawnHitText(0, 0, l);
-
-        if (currentLifes <= 0)
+        if (agility < accuracy)
         {
-            isDeath = true;
-            anim.Play("PlayerDeath", 0, 0.1f);
-            GameManager.Instance.GameOver();
+            l -= defense;
+
+            if (l <= 0)
+                l = 1;
+
+            point = stepPoint;
+
+            AudioManager.Instance.PlayEffects(getDamage);
+
+            updateBars(-l, 0);
+            GameManager.Instance.spawnHitText(0, 0, l);
+
+            if (currentLifes <= 0)
+            {
+                isDeath = true;
+                anim.Play("PlayerDeath", 0, 0.1f);
+                GameManager.Instance.GameOver();
+            }
+        }
+        else
+            GameManager.Instance.spawnHitText(0, 0, 0);
+    }
+
+    public void EatPlayer(int healthRecovery, int satietyRecovery)
+    {
+        AudioManager.Instance.PlayEffects(EatSound);
+        if (currentSatiety < maxSatiety)
+            updateBars(0, satietyRecovery);
+        if (currentLifes < maxLifes)
+            updateBars(healthRecovery, 0);
+    }
+
+    public void DrinkPotion(string potionName)
+    {
+        AudioManager.Instance.PlayEffects(DrinkPotionSound);
+
+        switch (potionName)
+        {
+            case "Potion_1":
+                updateBars(50, 0);
+                break;
+            case "Potion_2":
+                Debug.Log("Вы выпили зелье");
+                break;
+            case "Potion_3":
+                Debug.Log("Вы выпили зелье");
+                break;
+            case "Potion_4":
+                Debug.Log("Вы выпили зелье");
+                break;
+            default:
+                break;
         }
     }
 
-    public void HealPlayer()
+    public void updateBars(int health, int satiety)
     {
-        AudioManager.Instance.PlayEffects(EatSound);
-        if(currentLifes != maxLifes)
-        {
-            currentLifes++;
-            HealthBar.value = (float)currentLifes / (float)maxLifes;
-            GameManager.Instance.healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
-        }
+        currentSatiety += satiety;
+
+        if (currentSatiety > maxSatiety)
+            currentSatiety = maxSatiety;
+
+        currentLifes += health;
+
+        if (currentLifes > maxLifes)
+            currentLifes = maxLifes;
+
+        HealthBar.value = (float)currentLifes / (float)maxLifes;
+        GameManager.Instance.healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
+
+        SatietyBar.value = (float)currentSatiety / (float)maxSatiety;
+        GameManager.Instance.satietyCount.text = Player.Instance.currentSatiety.ToString() + "/" + Player.Instance.maxSatiety.ToString();
     }
 
     public void getExp(int expCount)
@@ -206,9 +279,55 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             GameManager.Instance.healthCount.text = "100/100";
             levelLimit += 50;
             GameManager.Instance.UpLevel();
+            skillPoints += 15;
         }
     }
-        
+
+    public void addAttack()
+    {
+        if (skillPoints > 0)
+        {
+            attack++;
+            skillPoints--;
+        }
+    }
+
+    public void addDefense()
+    {
+        if (skillPoints > 0)
+        {
+            defense++;
+            skillPoints--;
+        }
+    }
+
+    public void addAgility()
+    {
+        if (skillPoints > 0)
+        {
+            agility++;
+            skillPoints--;
+        }
+    }
+
+    public void addStamina()
+    {
+        if (skillPoints > 0)
+        {
+            stamina++;
+            skillPoints--;
+            maxLifes++;
+            currentLifes++;
+            GameManager.Instance.healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
+            HealthBar.value = (float)currentLifes / (float)maxLifes;
+
+            maxSatiety++;
+            currentSatiety++;
+            GameManager.Instance.satietyCount.text = Player.Instance.currentSatiety.ToString() + "/" + Player.Instance.maxSatiety.ToString();
+            SatietyBar.value = (float)currentSatiety / (float)maxSatiety;
+        }
+    }
+
     private void OpenDrop()
     {
         for(int i = 0; i < Generator.Instance.enemies.Length; i++)
@@ -351,6 +470,12 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         currentExp = save.currentExp;
         isMoving = save.isMoving;
 
+        skillPoints = save.skillPoints;
+        attack = save.attack;
+        defense = save.defense;
+        agility = save.agility;
+        stamina = save.stamina;
+
         Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
         HealthBar.value = (float)currentLifes / (float)maxLifes;
 
@@ -364,5 +489,3 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         isAnimation = false;
     }
 }
-
-  

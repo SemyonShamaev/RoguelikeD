@@ -33,6 +33,7 @@ public class Enemy : MonoBehaviour
         if(!isDeath)
         {
             float dist = Vector3.Distance(Player.Instance.transform.position, transform.position);
+
             if(dist < 4 && isSleep)
                 isSleep = false;
 
@@ -60,7 +61,6 @@ public class Enemy : MonoBehaviour
 
     private void Move()
     {
-        anim.Play("Walking", 0, 0.5f);
     	if(transform.position == stepPoint)
         {
             (stepPoint.x,stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)Player.Instance.transform.position.x, (int)Player.Instance.transform.position.y);   
@@ -76,6 +76,7 @@ public class Enemy : MonoBehaviour
 
         else
         {
+            anim.Play("Walking", 0, 0.5f);
             Generator.Instance.tiles[(int)transform.position.x][(int)transform.position.y] = Generator.TileType.Floor;
             Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] = Generator.TileType.Enemy;           
         }

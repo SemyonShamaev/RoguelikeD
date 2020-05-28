@@ -25,7 +25,9 @@ public class GameManager : Singleton<GameManager>
    	public Text levelCount;
    	public Text goldCount;
    	public Text healthCount;
+    public Text satietyCount;
     public Text playerLevelCount;
+    public Text playerCharacteristic;
 
 	public AudioClip BackgroundMusic;
 	public AudioClip DeathSound;
@@ -41,8 +43,13 @@ public class GameManager : Singleton<GameManager>
 	{
 		Application.targetFrameRate = 60;
 		AudioManager.Instance.PlayMusic(BackgroundMusic);
+
 		healthCount.text = Player.Instance.currentLifes.ToString() + 
             "/" + Player.Instance.maxLifes.ToString();
+
+        satietyCount.text = Player.Instance.currentSatiety.ToString() +
+            "/" + Player.Instance.maxSatiety.ToString();
+
         playerLevelCount.text = playerLevel.ToString();
 	}
 
@@ -75,27 +82,12 @@ public class GameManager : Singleton<GameManager>
 
 	public void PauseGame()
 	{
-		if(SettingsPanel.activeSelf || PausePanel.activeSelf)
-		{
-			SettingsPanel.SetActive(false);
-			PausePanel.SetActive(false);
-			onPause = false;
-			Time.timeScale = 1;
-		}
-		else
-		{
-			SettingsPanel.SetActive(true);
-			PausePanel.SetActive(true);
-			onPause = true;
-			Time.timeScale = 0;
-		}
+		onPause = true;
+		Time.timeScale = 0;
 	}
 
 	public void NextGame()
 	{
-		PausePanel.SetActive(false);
-		SettingsPanel.SetActive(false);
-
 		onPause = false;
 		Time.timeScale = 1;
 	}
@@ -105,12 +97,6 @@ public class GameManager : Singleton<GameManager>
 		onPause = true;
 		InventoryPlayerPanel.SetActive(!InventoryPlayerPanel.activeSelf);
 	}
-
-    public void OpenUpPlayerPanel()
-    {
-        UpLevelMessage.SetActive(false);
-        PlayerUpButton.SetActive(false);
-    }
 
 	public void ToNewLevel()
 	{
@@ -158,7 +144,20 @@ public class GameManager : Singleton<GameManager>
     {
         GameObject HitText = Instantiate(HitTextPrefab, new Vector3(x, y, 0), Quaternion.identity) as GameObject;
         HitText.transform.SetParent(HitParent.transform, false);
-        HitText.GetComponent<Text>().text = damageCount.ToString();
+        if (damageCount > 0)
+            HitText.GetComponent<Text>().text = damageCount.ToString();
+        else
+            HitText.GetComponent<Text>().text = "ПРОМАХ";
+    }
+
+    public void updateCharacteristic()
+    {
+       playerCharacteristic.text = Player.Instance.skillPoints.ToString() + "\n" +
+                                   Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString() + "\n" +
+                                   Player.Instance.attack.ToString() + "\n" +
+                                   Player.Instance.defense.ToString() + "\n" +
+                                   Player.Instance.agility.ToString() + "\n" +
+                                   Player.Instance.stamina.ToString();
     }
 
 	public void LoadData(Save.GameManagerSaveData save)
@@ -169,6 +168,10 @@ public class GameManager : Singleton<GameManager>
         goldCount.text = gold.ToString();
         levelCount.text = level.ToString();
         playerLevelCount.text = playerLevel.ToString();
+
+        UpLevelMessage.SetActive(save.levelUp);
+        PlayerUpButton.SetActive(save.levelUp);
+
         healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
     }
 }

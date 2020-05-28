@@ -6,7 +6,7 @@ public class AudioManager : Singleton<AudioManager>
 {
     public GameObject uiSource;
     public GameObject effectsSource;                    
-    public GameObject musicSource;                                  
+    public GameObject musicSource;   
 
     public void PlayEffects(AudioClip clip)
     { 
@@ -46,5 +46,4 @@ public class AudioManager : Singleton<AudioManager>
     {
         AudioListener.pause = false;
     }
-
 }

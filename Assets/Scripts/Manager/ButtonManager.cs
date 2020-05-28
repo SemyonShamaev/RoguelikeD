@@ -10,18 +10,6 @@ public class ButtonManager : Singleton<ButtonManager>
 {
 	public AudioMixer masterMixer;
 
-    public void YesBtn()
-    {
-    	GameManager.Instance.ToNewLevel();
-    }
-
-    public void NoBtn()
-    {
-    	GameManager.Instance.NextLevelPanel.SetActive(false);
-        GameManager.Instance.onPause = false;
-        Time.timeScale = 1;
-    }
-
     public void StartGameBtn()
     {
     	SceneManager.LoadScene("Game");
@@ -34,20 +22,10 @@ public class ButtonManager : Singleton<ButtonManager>
     	AudioManager.Instance.RestoreMusic();
     }
 
-    public void PauseButton()
-    {
-    	GameManager.Instance.PauseGame();
-    }
-
     public void SettingsButton()
     {
     	GameManager.Instance.PausePanel.SetActive(false);
         GameManager.Instance.SettingsPanel.SetActive(true);
-    }
-
-    public void NextButton()
-    {
-    	GameManager.Instance.NextGame();
     }
 
     public void RestartBtn()
@@ -93,5 +71,11 @@ public class ButtonManager : Singleton<ButtonManager>
             Generator.Instance.Invtr[i].SetActive(false);
             GameManager.Instance.onPause = false;
         }
+    }
+
+    public void PauseGame()
+    {
+        GameManager.Instance.onPause = true;
+        Time.timeScale = 0;
     }
 }
