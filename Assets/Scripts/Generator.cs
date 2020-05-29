@@ -201,7 +201,7 @@ public class Generator : Singleton<Generator>
                     gridPositions.Add(new Vector3(i, j));
 
                 else if(tiles[i][j] == TileType.Floor || tiles[i][j] == TileType.CorridorFloor)
-                    if(tiles[i][j] != TileType.End || tiles[i][j] != TileType.Start)
+                    if(tiles[i][j] != TileType.End && tiles[i][j] != TileType.Start)
                         enemyPositions.Add(new Vector3(i,j));
             }
         }
@@ -234,7 +234,7 @@ public class Generator : Singleton<Generator>
             int ItemId;
             for(int j = 0; j < InventoryContainers.maxCount; j++)
             {
-                ItemId = Random.Range(0, 18);
+                ItemId = Random.Range(0, 23);
                 InventoryContainers.AddItem(j, DataBase.Instance.items[ItemId], Random.Range(1,5), DataBase.Instance.items[ItemId].type);
             } 
         }

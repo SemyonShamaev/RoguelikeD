@@ -11,10 +11,13 @@ public class Inventory : Singleton<Inventory>
    
 	public GameObject gameObjShow;
 
-	public GameObject InventoryMainObject;
+    public GameObject PanelInventory;
+    public GameObject InventoryMainObject;
 	public int maxCount;
 
-	public Camera cam;
+    public AudioClip deleteSound;
+
+    public Camera cam;
 	public EventSystem es;
 
 	public int currentID;
@@ -23,14 +26,26 @@ public class Inventory : Singleton<Inventory>
 	public RectTransform movingObject;
 	public Vector3 offset;
 
+    private bool deleteMode;
+
 	public void Start()
 	{
 		if(items.Count == 0)
 			addGraphics();
 
         AddItem(0, DataBase.Instance.items[1], 100, DataBase.Instance.items[1].type);
+
         AddItem(1, DataBase.Instance.items[4], 1, DataBase.Instance.items[4].type);
+        Player.Instance.attack += DataBase.Instance.items[4].damage;
+
         AddItem(2, DataBase.Instance.items[9], 1, DataBase.Instance.items[9].type);
+        Player.Instance.defense += DataBase.Instance.items[9].defense;
+
+        AddItem(3, DataBase.Instance.items[18], 1, DataBase.Instance.items[18].type);
+        Player.Instance.agility += DataBase.Instance.items[18].agility;
+        Player.Instance.stamina += DataBase.Instance.items[18].stamina;
+
+        AddItem(4, DataBase.Instance.items[23], 1, DataBase.Instance.items[23].type);
         UpdateInventory();
 	}
 
@@ -81,25 +96,90 @@ public class Inventory : Singleton<Inventory>
 
 	public void SelectObject()
 	{
-        if(currentID == -1)
+        if(currentID == -1 && !deleteMode)
       	{
    			currentID = int.Parse(es.currentSelectedGameObject.name);
 
-   			if(items[currentID].type == DataBase.ItemType.Food)
-   			{
-   				items[currentID].count--;
-   				Player.Instance.EatPlayer(DataBase.Instance.items[items[currentID].id].healthRecovery, DataBase.Instance.items[items[currentID].id].satietyRecovery);
-   			}
+            if (items[currentID].type == DataBase.ItemType.Delete)
+            {
+                deleteMode = true;
+                PanelInventory.GetComponent<Image>().color = Color.red;
+            }
 
-            if(items[currentID].type == DataBase.ItemType.Potion)
+            if (items[currentID].type == DataBase.ItemType.Food)
+            {
+                items[currentID].count--;
+                Player.Instance.EatPlayer(DataBase.Instance.items[items[currentID].id].healthRecovery, DataBase.Instance.items[items[currentID].id].satietyRecovery);
+            }
+
+            else if (items[currentID].type == DataBase.ItemType.Potion)
             {
                 items[currentID].count--;
                 Player.Instance.DrinkPotion(DataBase.Instance.items[items[currentID].id].name);
             }
 
-   			currentID = -1;
+            else if (items[currentID].type == DataBase.ItemType.Weapon)
+            {
+                int ID = items[currentID].id;
+                Player.Instance.attack = Player.Instance.attack + DataBase.Instance.items[ID].damage - DataBase.Instance.items[items[1].id].damage;
+                AddItem(currentID, DataBase.Instance.items[items[1].id], 1, DataBase.Instance.items[items[1].id].type);
+                AddItem(1, DataBase.Instance.items[ID], 1, DataBase.Instance.items[ID].type);
+            }
+
+            else if (items[currentID].type == DataBase.ItemType.Shield)
+            {
+                int ID = items[currentID].id;
+                Player.Instance.defense = Player.Instance.defense + DataBase.Instance.items[ID].defense - DataBase.Instance.items[items[2].id].defense;
+                AddItem(currentID, DataBase.Instance.items[items[2].id], 1, DataBase.Instance.items[items[2].id].type);
+                AddItem(2, DataBase.Instance.items[ID], 1, DataBase.Instance.items[ID].type);
+            }
+
+            else if (items[currentID].type == DataBase.ItemType.Armor)
+            {
+                int ID = items[currentID].id;
+                Player.Instance.agility = Player.Instance.agility + DataBase.Instance.items[ID].agility - DataBase.Instance.items[items[3].id].agility;
+                Player.Instance.stamina = Player.Instance.stamina + DataBase.Instance.items[ID].stamina - DataBase.Instance.items[items[3].id].stamina;
+                Player.Instance.maxLifes = Player.Instance.maxLifes + DataBase.Instance.items[ID].stamina - DataBase.Instance.items[items[3].id].stamina;
+                Player.Instance.maxSatiety = Player.Instance.maxSatiety + DataBase.Instance.items[ID].stamina - DataBase.Instance.items[items[3].id].stamina;
+
+                if (Player.Instance.currentLifes > Player.Instance.maxLifes)
+                    Player.Instance.currentLifes = Player.Instance.maxLifes;
+                if (Player.Instance.currentSatiety > Player.Instance.maxSatiety)
+                    Player.Instance.currentSatiety = Player.Instance.maxSatiety;
+
+                Player.Instance.HealthBar.value = (float)Player.Instance.currentLifes / (float)Player.Instance.maxLifes;
+                GameManager.Instance.healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
+
+                Player.Instance.SatietyBar.value = (float)Player.Instance.currentSatiety / (float)Player.Instance.maxSatiety;
+                GameManager.Instance.satietyCount.text = Player.Instance.currentSatiety.ToString() + "/" + Player.Instance.maxSatiety.ToString();
+
+                AddItem(currentID, DataBase.Instance.items[items[3].id], 1, DataBase.Instance.items[items[3].id].type);
+                AddItem(3, DataBase.Instance.items[ID], 1, DataBase.Instance.items[ID].type);
+            }
+
+            currentID = -1;
    			UpdateInventory();
    		}
+
+        else if(currentID == -1 && deleteMode)
+        {
+            currentID = int.Parse(es.currentSelectedGameObject.name);
+
+            if (items[currentID].type == DataBase.ItemType.Delete)
+            {
+                deleteMode = false;
+                PanelInventory.GetComponent<Image>().color = Color.grey;
+            }
+
+            else if(currentID > 4)
+            {
+                AddItem(currentID, DataBase.Instance.items[0], 0, DataBase.Instance.items[0].type);
+                AudioManager.Instance.PlayEffects(deleteSound);
+            }
+
+            currentID = -1;
+            UpdateInventory();
+        }
 	}
 
 	public void UpdateInventory()
@@ -107,17 +187,46 @@ public class Inventory : Singleton<Inventory>
 		for(int i = 0; i < maxCount; i++)
  		{
  			items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[items[i].id].image;
-			if(items[i].count > 1)
-   				items[i].itemGameObj.GetComponentInChildren<Text>().text = items[i].count.ToString();
-            else if(items[i].count == 1)
+
+            if (items[i].type == DataBase.ItemType.Weapon)
+            {
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = DataBase.Instance.items[items[i].id].damage.ToString() + " НАП";
+                items[i].itemGameObj.GetComponentInChildren<Text>().color = Color.red;
+            }
+
+            else if (items[i].type == DataBase.ItemType.Shield)
+            {
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = DataBase.Instance.items[items[i].id].defense.ToString() + " ЗЩТ";
+                items[i].itemGameObj.GetComponentInChildren<Text>().color = Color.green;
+            }
+
+            else if (items[i].type == DataBase.ItemType.Armor)
+            {
+                if (DataBase.Instance.items[items[i].id].agility > DataBase.Instance.items[items[i].id].stamina)
+                {
+                    items[i].itemGameObj.GetComponentInChildren<Text>().text = DataBase.Instance.items[items[i].id].agility.ToString() + " ЛОВ";
+                    items[i].itemGameObj.GetComponentInChildren<Text>().color = Color.magenta;
+                }
+                else if(DataBase.Instance.items[items[i].id].agility < DataBase.Instance.items[items[i].id].stamina)
+                {
+                    items[i].itemGameObj.GetComponentInChildren<Text>().text = DataBase.Instance.items[items[i].id].stamina.ToString() + " ВЫН";
+                    items[i].itemGameObj.GetComponentInChildren<Text>().color = Color.grey;
+                }
+            }
+
+            else if (items[i].count > 1)
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = items[i].count.ToString();
+
+            else if (items[i].count == 1)
                 items[i].itemGameObj.GetComponentInChildren<Text>().text = "";
+
             else
-   			{
-   				items[i].itemGameObj.GetComponentInChildren<Text>().text = "";
-   				items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[0].image;
-   				items[i].type = DataBase.ItemType.Empty;
-   				items[i].id = 0;
-   			}		
+            {
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = "";
+                items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[0].image;
+                items[i].type = DataBase.ItemType.Empty;
+                items[i].id = 0;
+            }		
    		}
 	}
 
@@ -134,5 +243,7 @@ public class Inventory : Singleton<Inventory>
     	{
     		AddItem(i, DataBase.Instance.items[save[i].id], save[i].count, DataBase.Instance.items[save[i].id].type);
     	}
+
+        UpdateInventory();
     }
 } 

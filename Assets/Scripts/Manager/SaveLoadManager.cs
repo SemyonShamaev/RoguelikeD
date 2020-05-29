@@ -327,13 +327,11 @@ public class Save
     public struct GameManagerSaveData
     {
         public int levelCount;
-        public int goldCount;
         public int playerLevel;
         public bool levelUp;
-        public GameManagerSaveData(int levelCount, int goldCount, int playerLevel, bool levelUp)
+        public GameManagerSaveData(int levelCount, int playerLevel, bool levelUp)
         {
             this.levelCount = levelCount;
-            this.goldCount = goldCount;
             this.playerLevel = playerLevel;
             this.levelUp = levelUp;
         }
@@ -341,10 +339,9 @@ public class Save
     public void SaveGameManager()
     {
         int levelCount = GameManager.Instance.level;
-        int goldCount = GameManager.Instance.gold;
         int playerLevel = GameManager.Instance.playerLevel;
         bool levelUp = GameManager.Instance.UpLevelMessage.activeSelf;
-        gameManagerData = new GameManagerSaveData(levelCount, goldCount, playerLevel, levelUp);
+        gameManagerData = new GameManagerSaveData(levelCount, playerLevel, levelUp);
     }
 
     [System.Serializable]

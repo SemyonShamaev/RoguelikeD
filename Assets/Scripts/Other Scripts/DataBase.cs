@@ -10,7 +10,7 @@ public class DataBase : Singleton<DataBase>
 
 	public enum ItemType 
 	{
-    	Empty, Gold, Food, Weapon, Shield, Potion
+    	Empty, Gold, Food, Weapon, Shield, Potion, Armor, Delete
 	}
 }
 
@@ -25,4 +25,7 @@ public class Item
     public int satietyRecovery;
     public int damage;
     public int defense;
+    public int agility;
+    public int stamina;
+    public int cost;
 }

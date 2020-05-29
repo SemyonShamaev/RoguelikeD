@@ -8,7 +8,6 @@ using Rogue;
 public class GameManager : Singleton<GameManager>
 {
    	public int level = 1;
-    public int gold = 0;
     public int playerLevel;
     public float gameSpeed;
 
@@ -23,7 +22,6 @@ public class GameManager : Singleton<GameManager>
     public GameObject PlayerUpButton;
 
    	public Text levelCount;
-   	public Text goldCount;
    	public Text healthCount;
     public Text satietyCount;
     public Text playerLevelCount;
@@ -31,7 +29,6 @@ public class GameManager : Singleton<GameManager>
 
 	public AudioClip BackgroundMusic;
 	public AudioClip DeathSound;
-	public AudioClip soundOfGold;
     public AudioClip soundOfUpLevel;
 
 	public bool onPause = false;
@@ -133,13 +130,6 @@ public class GameManager : Singleton<GameManager>
 		GameOverPanel.SetActive(true);
 	}
 
-	public void addGold(int GoldCount)
-	{
-        gold += GoldCount;
-		goldCount.text = gold.ToString();
-		AudioManager.Instance.PlayEffects(soundOfGold);
-	}
-
     public void spawnHitText(int x, int y, int damageCount)
     {
         GameObject HitText = Instantiate(HitTextPrefab, new Vector3(x, y, 0), Quaternion.identity) as GameObject;
@@ -162,10 +152,8 @@ public class GameManager : Singleton<GameManager>
 
 	public void LoadData(Save.GameManagerSaveData save)
     {
-        gold = save.goldCount;
         level = save.levelCount;
         playerLevel = save.playerLevel;
-        goldCount.text = gold.ToString();
         levelCount.text = level.ToString();
         playerLevelCount.text = playerLevel.ToString();
 

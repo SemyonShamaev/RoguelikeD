@@ -26,9 +26,10 @@ public class InventoryEnemy : Singleton<DataBase>
     public List<ItemInventory> items = new List<ItemInventory>();
 
     public AudioClip takeSound;
+    public AudioClip goldSound;
     public AudioClip cancelSound;
 
-	private bool isAdded = false;
+	private bool isAdded;
 
 	public void Start()
 	{
@@ -83,19 +84,27 @@ public class InventoryEnemy : Singleton<DataBase>
         {
             currentID = int.Parse(es.currentSelectedGameObject.name);
 
-            if (items[currentID].type == DataBase.ItemType.Gold)
+            if (items[currentID].type == DataBase.ItemType.Empty)
             {
-                Inventory.Instance.items[0].count += items[currentID].count;
+                AudioManager.Instance.PlayEffects(cancelSound);
                 isAdded = true;
             }
 
-            else if(items[currentID].type == DataBase.ItemType.Weapon || items[currentID].type == DataBase.ItemType.Shield)
+            else if (items[currentID].type == DataBase.ItemType.Gold)
             {
-                for(int i = 4; i < Inventory.Instance.maxCount; i++)
+                Inventory.Instance.items[0].count += items[currentID].count;
+                AudioManager.Instance.PlayEffects(goldSound);
+                isAdded = true;
+            }
+
+            else if (items[currentID].type == DataBase.ItemType.Weapon || items[currentID].type == DataBase.ItemType.Shield || items[currentID].type == DataBase.ItemType.Armor)
+            {
+                for (int i = 5; i < Inventory.Instance.maxCount; i++)
                 {
                     if (Inventory.Instance.items[i].id == 0)
                     {
                         Inventory.Instance.AddItem(i, DataBase.Instance.items[items[currentID].id], items[currentID].count, items[currentID].type);
+                        AudioManager.Instance.PlayEffects(takeSound);
                         isAdded = true;
                         break;
                     }
@@ -104,13 +113,14 @@ public class InventoryEnemy : Singleton<DataBase>
 
             else if (items[currentID].type != DataBase.ItemType.Empty)
             {
-                for (int i = 4; i < Inventory.Instance.maxCount; i++)
+                for (int i = 5; i < Inventory.Instance.maxCount; i++)
                 {
                     if (Inventory.Instance.items[i].id == items[currentID].id)
                     {
                         if (Inventory.Instance.items[i].count + items[currentID].count <= 128)
                         {
                             Inventory.Instance.AddItem(i, DataBase.Instance.items[items[currentID].id], Inventory.Instance.items[i].count + items[currentID].count, items[currentID].type);
+                            AudioManager.Instance.PlayEffects(takeSound);
                             isAdded = true;
                             break;
                         }
@@ -126,19 +136,19 @@ public class InventoryEnemy : Singleton<DataBase>
 
             if (!isAdded)
             {
-                for (int i = 4; i < Inventory.Instance.maxCount; i++)
+                for (int i = 5; i < Inventory.Instance.maxCount; i++)
                 {
                     if (Inventory.Instance.items[i].id == 0)
                     {
                         Inventory.Instance.AddItem(i, DataBase.Instance.items[items[currentID].id], items[currentID].count, items[currentID].type);
+                        AudioManager.Instance.PlayEffects(takeSound);
                         isAdded = true;
                         break;
                     }
                 }
             }
 
-            Inventory.Instance.UpdateInventory();
-            AudioManager.Instance.PlayEffects(takeSound);
+            Inventory.Instance.UpdateInventory();     
         }
 
         if (isAdded)
@@ -154,15 +164,50 @@ public class InventoryEnemy : Singleton<DataBase>
 
     public void UpdateInventory()
     {
-   	    for(int i = 0; i < maxCount; i++)
-   	    {
-   		    if(items[i].id != 0 && items[i].count > 1)
-   			    items[i].itemGameObj.GetComponentInChildren<Text>().text = items[i].count.ToString();
-   		    else
-   			    items[i].itemGameObj.GetComponentInChildren<Text>().text = "";
+        for (int i = 0; i < maxCount; i++)
+        {
+            items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[items[i].id].image;
 
-  			items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[items[i].id].image;
-   	    }
+            if (items[i].type == DataBase.ItemType.Weapon)
+            {
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = DataBase.Instance.items[items[i].id].damage.ToString() + " НАП";
+                items[i].itemGameObj.GetComponentInChildren<Text>().color = Color.red;
+            }
+
+            else if (items[i].type == DataBase.ItemType.Shield)
+            {
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = DataBase.Instance.items[items[i].id].defense.ToString() + " ЗЩТ";
+                items[i].itemGameObj.GetComponentInChildren<Text>().color = Color.green;
+            }
+
+            else if (items[i].type == DataBase.ItemType.Armor)
+            {
+                if (DataBase.Instance.items[items[i].id].agility > DataBase.Instance.items[items[i].id].stamina)
+                {
+                    items[i].itemGameObj.GetComponentInChildren<Text>().text = DataBase.Instance.items[items[i].id].agility.ToString() + " ЛОВ";
+                    items[i].itemGameObj.GetComponentInChildren<Text>().color = Color.magenta;
+                }
+                else if (DataBase.Instance.items[items[i].id].agility < DataBase.Instance.items[items[i].id].stamina)
+                {
+                    items[i].itemGameObj.GetComponentInChildren<Text>().text = DataBase.Instance.items[items[i].id].stamina.ToString() + " ВЫН";
+                    items[i].itemGameObj.GetComponentInChildren<Text>().color = Color.grey;
+                }
+            }
+
+            else if (items[i].count > 1 && items[i].type != DataBase.ItemType.Empty)
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = items[i].count.ToString();
+
+            else if (items[i].count == 1 && items[i].type != DataBase.ItemType.Empty)
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = "";
+
+            else
+            {
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = "";
+                items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[0].image;
+                items[i].type = DataBase.ItemType.Empty;
+                items[i].id = 0;
+            }
+        }
     }
 
     public void LoadData(Save.EnemyInventorySaveData save, int k)
