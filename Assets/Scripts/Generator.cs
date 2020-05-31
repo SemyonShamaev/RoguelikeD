@@ -18,7 +18,8 @@ public class Generator : Singleton<Generator>
         Start,
         Object,
         Enemy,
-        Drop
+        Drop,
+        Seller
     };
 
     public TileType[][] tiles;
@@ -39,6 +40,7 @@ public class Generator : Singleton<Generator>
     public GameObject[] Invtr;
     public GameObject[] InvtrContainers;
     public GameObject Inventory;
+    public GameObject seller;
 
     public int[] enemyTypes;
 
@@ -48,6 +50,7 @@ public class Generator : Singleton<Generator>
 
     private List<Vector3> gridPositions = new List<Vector3>();
     private List<Vector3> enemyPositions = new List<Vector3>();
+    private Vector3 sellerPositions = new Vector3();
     private Vector3 endPosition;
 
     private int level;
@@ -75,7 +78,7 @@ public class Generator : Singleton<Generator>
             tiles[i] = new TileType[MapRows];
         }
 
-        tiles[MapColumns/2][MapRows/2] = TileType.Start;
+        tiles[100][100] = TileType.Start;
     }
 
     private void addRoomsAndCorridors()
@@ -144,10 +147,10 @@ public class Generator : Singleton<Generator>
                     int yPos = currentRoom.yPos + k; 
                     tiles[xPos][yPos] = TileType.Floor;
                 }
-            } 
+            }
 
-            if (i == rooms.Length - 1) 
-                tiles[rooms[i].xPos + rooms[i].roomHeight/2][rooms[i].yPos + rooms[i].roomWidth/2] = TileType.End;
+            if (i == rooms.Length - 1)
+                tiles[rooms[i].xPos + rooms[i].roomHeight / 2][rooms[i].yPos + rooms[i].roomWidth / 2] = TileType.End;
         }   
     }
 
@@ -157,7 +160,7 @@ public class Generator : Singleton<Generator>
         {
             for (int j = 1; j < tiles[i].Length - 1; j++)
             {
-                if (tiles[i][j] != TileType.Floor && tiles[i][j] != TileType.CorridorFloor && tiles[i][j] != TileType.End && CheckFloor(i, j))
+                if (tiles[i][j] != TileType.Floor && tiles[i][j] != TileType.CorridorFloor && tiles[i][j] != TileType.Seller && tiles[i][j] != TileType.End && CheckFloor(i, j))
                     tiles[i][j] = TileType.Wall;
             }
         }
@@ -181,12 +184,14 @@ public class Generator : Singleton<Generator>
                     GameObject wallInstance = Instantiate(wallTiles[0], positionWall, Quaternion.identity) as GameObject;
                     wallInstance.transform.parent = transform;
                 }
+               
                 else if(tiles[i][j] != TileType.Empty)
                 {
                     Vector3 positionFloor = new Vector3(i, j, 0f);
                     GameObject floorInstance = Instantiate(floorTiles[0], positionFloor, Quaternion.identity) as GameObject;
                     floorInstance.transform.parent = transform;
                 }    
+
             }
         }
     }
@@ -197,12 +202,26 @@ public class Generator : Singleton<Generator>
         {
             for(int j = 0; j < MapRows; j++)
             {
-                if(tiles[i][j] == TileType.Floor && CheckWall(i, j) && CheckCorridorFloor(i, j))
+                int rand = Random.Range(0, 27);
+
+                if (tiles[i][j] == TileType.Floor && CheckWall(i, j) && CheckCorridorFloor(i, j))
                     gridPositions.Add(new Vector3(i, j));
 
-                else if(tiles[i][j] == TileType.Floor || tiles[i][j] == TileType.CorridorFloor)
-                    if(tiles[i][j] != TileType.End && tiles[i][j] != TileType.Start)
-                        enemyPositions.Add(new Vector3(i,j));
+                else if (tiles[i][j] == TileType.Floor && rand == 25 && CheckCorridorFloor(i, j))
+                {
+                    if (tiles[i][j] != TileType.End && tiles[i][j] != TileType.Start)
+                    {
+                        tiles[i][j] = TileType.Seller;
+                        Vector3 positionSeller = new Vector3(i, j, 0f);
+                        GameObject sellerInstance = Instantiate(seller, positionSeller, Quaternion.identity) as GameObject;
+                        sellerInstance.transform.parent = transform;
+                        Debug.Log("создалось");
+                    }
+                }
+
+                else if (tiles[i][j] == TileType.Floor || tiles[i][j] == TileType.CorridorFloor)
+                    if (tiles[i][j] != TileType.End && tiles[i][j] != TileType.Start)
+                        enemyPositions.Add(new Vector3(i, j));
             }
         }
 

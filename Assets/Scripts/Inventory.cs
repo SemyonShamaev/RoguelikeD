@@ -188,7 +188,12 @@ public class Inventory : Singleton<Inventory>
  		{
  			items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[items[i].id].image;
 
-            if (items[i].type == DataBase.ItemType.Weapon)
+            if(items[i].type == DataBase.ItemType.Gold && items[i].count == 0)
+            {
+                items[i].itemGameObj.GetComponentInChildren<Text>().text = "0";
+            }
+
+            else if (items[i].type == DataBase.ItemType.Weapon)
             {
                 items[i].itemGameObj.GetComponentInChildren<Text>().text = DataBase.Instance.items[items[i].id].damage.ToString() + " НАП";
                 items[i].itemGameObj.GetComponentInChildren<Text>().color = Color.red;

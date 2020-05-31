@@ -96,8 +96,8 @@ public class GameManager : Singleton<GameManager>
 	}
 
 	public void ToNewLevel()
-	{
-		onPause = false;
+    { 
+        onPause = false;
 		Time.timeScale = 1;
 
 		TransitionAnim = GameObject.Find("Panel").GetComponent<Animation>();
