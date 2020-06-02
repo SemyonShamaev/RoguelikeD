@@ -19,13 +19,18 @@ public class Generator : Singleton<Generator>
         Object,
         Enemy,
         Drop,
-        Seller
+        Seller,
+        Chest,
+        Sign,
+        Well,
+        Buyer
     };
 
     public TileType[][] tiles;
 
     public int MapRows; 
-    public int MapColumns; 
+    public int MapColumns;
+    public int roomsCount;
     public int roomWidth; 
     public int roomHeight; 
     public int corridorLength; 
@@ -35,8 +40,10 @@ public class Generator : Singleton<Generator>
     public GameObject[] enemyTiles;
     public GameObject[] floorTiles;
     public GameObject[] containersTiles;
+    public GameObject[] otherObjectsTiles;
     public GameObject[] enemies;
     public GameObject[] containers;
+    public GameObject[] otherObjects;
     public GameObject[] Invtr;
     public GameObject[] InvtrContainers;
     public GameObject Inventory;
@@ -50,7 +57,6 @@ public class Generator : Singleton<Generator>
 
     private List<Vector3> gridPositions = new List<Vector3>();
     private List<Vector3> enemyPositions = new List<Vector3>();
-    private Vector3 sellerPositions = new Vector3();
     private Vector3 endPosition;
 
     private int level;
@@ -58,6 +64,7 @@ public class Generator : Singleton<Generator>
     public void setupScene(int level)
     {
         this.level = level;
+        roomsCount = level + 9;
 
         clearGeneratorData();
         addTilesMap();
@@ -65,8 +72,10 @@ public class Generator : Singleton<Generator>
         addWalls();
         addInstance();
         addPositions();
-        addObjectsOnMap(containersTiles, 20, 30);
-        addEnemyOnMap(enemyTiles, 2, 5);
+
+        addObjectsOnMap(containersTiles, roomsCount, roomsCount + 2);
+        addEnemyOnMap(enemyTiles, roomsCount - 7, roomsCount - 5);
+        addOtherObjectsOnMap(otherObjectsTiles);
     }
 
     private void addTilesMap()
@@ -77,13 +86,11 @@ public class Generator : Singleton<Generator>
         {
             tiles[i] = new TileType[MapRows];
         }
-
-        tiles[100][100] = TileType.Start;
     }
 
     private void addRoomsAndCorridors()
     {
-        rooms = new Room[10]; 
+        rooms = new Room[roomsCount]; 
         corridors = new Corridor[rooms.Length - 1];
 
         rooms[0] = new Room();
@@ -145,13 +152,15 @@ public class Generator : Singleton<Generator>
                 for (int k = 0; k < currentRoom.roomHeight; k++) 
                 {
                     int yPos = currentRoom.yPos + k; 
-                    tiles[xPos][yPos] = TileType.Floor;
+                    tiles[xPos][yPos] = TileType.Floor;     
                 }
             }
 
             if (i == rooms.Length - 1)
                 tiles[rooms[i].xPos + rooms[i].roomHeight / 2][rooms[i].yPos + rooms[i].roomWidth / 2] = TileType.End;
-        }   
+        }
+
+        tiles[0][0] = TileType.Start;
     }
 
     private void addWalls()
@@ -168,11 +177,16 @@ public class Generator : Singleton<Generator>
 
     private void addInstance()
     {
+        int tileType = 0;
+
+        if (level > 20)
+            tileType = 1;
+
         for (int i = 1; i < tiles.Length - 1; i++)
         {
             for (int j = 1; j < tiles[i].Length - 1; j++)
             {
-                if (tiles[i][j] == TileType.End)
+                if (tiles[i][j] == TileType.End && level != 25)
                 {
                     endPosition = new Vector3(i, j, 0f);
                     GameObject endInstance = Instantiate(endTiles[0], endPosition, Quaternion.identity) as GameObject;
@@ -181,17 +195,24 @@ public class Generator : Singleton<Generator>
                 else if (tiles[i][j] == TileType.Wall)
                 {
                     Vector3 positionWall = new Vector3(i, j, 0f);
-                    GameObject wallInstance = Instantiate(wallTiles[0], positionWall, Quaternion.identity) as GameObject;
+                    GameObject wallInstance = Instantiate(wallTiles[tileType], positionWall, Quaternion.identity) as GameObject;
                     wallInstance.transform.parent = transform;
                 }
                
                 else if(tiles[i][j] != TileType.Empty)
                 {
                     Vector3 positionFloor = new Vector3(i, j, 0f);
-                    GameObject floorInstance = Instantiate(floorTiles[0], positionFloor, Quaternion.identity) as GameObject;
+                    GameObject floorInstance = Instantiate(floorTiles[tileType], positionFloor, Quaternion.identity) as GameObject;
                     floorInstance.transform.parent = transform;
-                }    
+                }
 
+                if (level == 25 && tiles[i][j] == TileType.End)
+                {
+                    endPosition = new Vector3(i, j, 0f);
+                    GameObject endInstance = Instantiate(endTiles[1], endPosition, Quaternion.identity) as GameObject;
+                    endInstance.transform.parent = transform;
+                    tiles[i][j] = TileType.Chest;
+                }
             }
         }
     }
@@ -202,25 +223,11 @@ public class Generator : Singleton<Generator>
         {
             for(int j = 0; j < MapRows; j++)
             {
-                int rand = Random.Range(0, 27);
-
                 if (tiles[i][j] == TileType.Floor && CheckWall(i, j) && CheckCorridorFloor(i, j))
                     gridPositions.Add(new Vector3(i, j));
 
-                else if (tiles[i][j] == TileType.Floor && rand == 25 && CheckCorridorFloor(i, j))
-                {
-                    if (tiles[i][j] != TileType.End && tiles[i][j] != TileType.Start)
-                    {
-                        tiles[i][j] = TileType.Seller;
-                        Vector3 positionSeller = new Vector3(i, j, 0f);
-                        GameObject sellerInstance = Instantiate(seller, positionSeller, Quaternion.identity) as GameObject;
-                        sellerInstance.transform.parent = transform;
-                        Debug.Log("создалось");
-                    }
-                }
-
                 else if (tiles[i][j] == TileType.Floor || tiles[i][j] == TileType.CorridorFloor)
-                    if (tiles[i][j] != TileType.End && tiles[i][j] != TileType.Start)
+                    if (tiles[i][j] != TileType.End && (i > 107 || i < 93) && (j > 107 || j < 93))
                         enemyPositions.Add(new Vector3(i, j));
             }
         }
@@ -251,14 +258,40 @@ public class Generator : Singleton<Generator>
             InventoryEnemy InventoryContainers = InvtrContainers[i].GetComponentInChildren<InventoryEnemy>();
             
             int ItemId;
-            for(int j = 0; j < InventoryContainers.maxCount; j++)
+            for(int j = 0; j < 3; j++)
             {
-                ItemId = Random.Range(0, 23);
+                ItemId = Random.Range(1, 4);
                 InventoryContainers.AddItem(j, DataBase.Instance.items[ItemId], Random.Range(1,5), DataBase.Instance.items[ItemId].type);
             } 
         }
     }
 
+    private void addOtherObjectsOnMap(GameObject[] tileArray)
+    {
+        otherObjects = new GameObject[roomsCount];
+        for (int i = 0; i < otherObjects.Length; i++)
+        {
+            int randomIndex = Random.Range(0, gridPositions.Count);
+            Vector3 randomPosition = gridPositions[randomIndex];
+            gridPositions.RemoveAt(randomIndex);
+
+            int tileType = Random.Range(0, tileArray.Length);
+
+            if(tileType == 0)
+                tiles[(int)randomPosition.x][(int)randomPosition.y] = TileType.Seller;
+            if(tileType == 1)
+                tiles[(int)randomPosition.x][(int)randomPosition.y] = TileType.Sign;
+            if(tileType == 2)
+                tiles[(int)randomPosition.x][(int)randomPosition.y] = TileType.Well;
+            if (tileType == 3)
+                tiles[(int)randomPosition.x][(int)randomPosition.y] = TileType.Buyer;
+
+            GameObject tileChoice = tileArray[tileType];
+            otherObjects[i] = Instantiate(tileChoice, randomPosition, Quaternion.identity) as GameObject;
+            otherObjects[i].transform.parent = transform;
+
+        }
+    }
     private void addEnemyOnMap(GameObject[] tileArray, int minimum, int maximum)
     {
         enemies = new GameObject[Random.Range(minimum, maximum + 1)]; 
@@ -271,7 +304,17 @@ public class Generator : Singleton<Generator>
             Vector3 randomPosition = enemyPositions[randomIndex];
             enemyPositions.RemoveAt(randomIndex);
 
-            enemyTypes[i] = Random.Range(0, tileArray.Length);
+            if (level < 5)
+                enemyTypes[i] = Random.Range(0, 2);
+            else if (level < 10)
+                enemyTypes[i] = Random.Range(1, 3);
+            else if(level < 15)
+                enemyTypes[i] = Random.Range(2, 5);
+            else if(level < 20)
+                enemyTypes[i] = Random.Range(1, 7);
+            else
+                enemyTypes[i] = Random.Range(5, 7);
+
             GameObject tileChoice = tileArray[enemyTypes[i]];
             enemies[i] = Instantiate(tileChoice, randomPosition, Quaternion.identity) as GameObject;
             enemies[i].transform.parent = transform;
@@ -284,12 +327,58 @@ public class Generator : Singleton<Generator>
             
             InventoryEnemy invtrEnemy = Invtr[i].GetComponentInChildren<InventoryEnemy>();
 
-            int ItemId;
-            for(int j = 0; j < invtrEnemy.maxCount; j++)
+           
+            if (enemyTypes[i] == 0)
             {
-                ItemId = Random.Range(0, 3);
-                invtrEnemy.AddItem(j, DataBase.Instance.items[ItemId], Random.Range(1, 5), DataBase.Instance.items[ItemId].type);
-            } 
+                invtrEnemy.AddItem(0, DataBase.Instance.items[4], 1, DataBase.Instance.items[4].type);
+                invtrEnemy.AddItem(1, DataBase.Instance.items[9], 1, DataBase.Instance.items[9].type);
+            }
+            else if (enemyTypes[i] == 1)
+            {
+                invtrEnemy.AddItem(0, DataBase.Instance.items[4], 1, DataBase.Instance.items[4].type);
+                invtrEnemy.AddItem(1, DataBase.Instance.items[9], 1, DataBase.Instance.items[9].type);
+                invtrEnemy.AddItem(2, DataBase.Instance.items[18], 1, DataBase.Instance.items[18].type);
+            }
+            else if (enemyTypes[i] == 2)
+            {
+                invtrEnemy.AddItem(0, DataBase.Instance.items[4], 1, DataBase.Instance.items[4].type);
+                invtrEnemy.AddItem(1, DataBase.Instance.items[9], 1, DataBase.Instance.items[9].type);
+                invtrEnemy.AddItem(2, DataBase.Instance.items[19], 1, DataBase.Instance.items[19].type);
+            }
+            else if (enemyTypes[i] == 3)
+            {
+                invtrEnemy.AddItem(0, DataBase.Instance.items[Random.Range(14, 18)], 1, DataBase.Instance.items[14].type);
+                invtrEnemy.AddItem(1, DataBase.Instance.items[Random.Range(14, 18)], 1, DataBase.Instance.items[14].type);
+                invtrEnemy.AddItem(2, DataBase.Instance.items[Random.Range(14, 18)], 1, DataBase.Instance.items[14].type);
+            }
+            else if (enemyTypes[i] == 4)
+            {
+                invtrEnemy.AddItem(0, DataBase.Instance.items[14], 1, DataBase.Instance.items[14].type);
+                invtrEnemy.AddItem(1, DataBase.Instance.items[11], 1, DataBase.Instance.items[11].type);
+                invtrEnemy.AddItem(2, DataBase.Instance.items[1], 50, DataBase.Instance.items[1].type);
+            }
+            else if (enemyTypes[i] == 5)
+            {
+                invtrEnemy.AddItem(0, DataBase.Instance.items[Random.Range(14, 18)], 1, DataBase.Instance.items[14].type);
+                invtrEnemy.AddItem(1, DataBase.Instance.items[Random.Range(14, 18)], 1, DataBase.Instance.items[14].type);
+                invtrEnemy.AddItem(2, DataBase.Instance.items[Random.Range(14, 18)], 1, DataBase.Instance.items[14].type);
+            }
+            else if (enemyTypes[i] == 6)
+            {
+                invtrEnemy.AddItem(0, DataBase.Instance.items[7], 1, DataBase.Instance.items[7].type);
+                invtrEnemy.AddItem(1, DataBase.Instance.items[11], 1, DataBase.Instance.items[11].type);
+                invtrEnemy.AddItem(2, DataBase.Instance.items[21], 1, DataBase.Instance.items[21].type);
+            }
+
+            if (enemyTypes[i] != 1)
+            {
+                int ItemId;
+                for (int j = 3; j < invtrEnemy.maxCount; j++)
+                {
+                    ItemId = Random.Range(0, 3);
+                    invtrEnemy.AddItem(j, DataBase.Instance.items[ItemId], Random.Range(1, 5), DataBase.Instance.items[ItemId].type);
+                }
+            }
         }
     }
 

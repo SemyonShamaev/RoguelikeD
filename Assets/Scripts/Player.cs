@@ -6,6 +6,7 @@ using Rogue;
 
 public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler 
 {
+    public GameObject shopPanel;
  
     public Vector3 point;
     public Vector3 stepPoint;
@@ -54,7 +55,9 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             isMoving = true;
             (stepPoint.x, stepPoint.y) = FindWave((int)transform.position.x, (int)transform.position.y, (int)point.x, (int)point.y);
             ChangeSprite();
-            GiveStepEnemies();
+            if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Floor ||
+                Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.CorridorFloor)
+                GiveStepEnemies();
         }    
     }
 
@@ -103,6 +106,52 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             isMoving = false;
             HitEnemy((int)stepPoint.x, (int)stepPoint.y);
             stepPoint = transform.position;
+        }
+
+        else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Seller)
+        {
+            isMoving = false;
+            stepPoint = transform.position;
+            shopPanel.SetActive(true);
+
+            int ItemId = 2;
+            int i = 0;
+
+            while(i < 25)
+            {
+                if (ItemId < 23)
+                {
+                    Shop.Instance.AddItem(i, DataBase.Instance.items[ItemId], 1, DataBase.Instance.items[ItemId].type);
+                    i++;
+                    ItemId++;
+
+                    if (DataBase.Instance.items[ItemId].type != DataBase.Instance.items[ItemId - 1].type)
+                    {
+                        float j = (float)(i + 5) / 5;
+                        Debug.Log(j);
+
+                        if (j > 1 && j < 2)
+                            i = 5;
+                        else if (j > 2 && j < 3)
+                            i = 10;
+                        else if (j > 3 && j < 4)
+                            i = 15;
+                        else if (j > 4)
+                            i = 20;
+                    }
+                }
+                else
+                {
+                    i = 26;
+                }
+            }
+        }
+
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Chest)
+        {
+            isMoving = false;
+            stepPoint = transform.position;
+            GameManager.Instance.Win();
         }
 
         else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Object)

@@ -20,8 +20,9 @@ public class GameManager : Singleton<GameManager>
     public GameObject UpLevelMessage;
     public GameObject HitParent, HitTextPrefab;
     public GameObject PlayerUpButton;
+    public GameObject WinPanel;
 
-   	public Text levelCount;
+    public Text levelCount;
    	public Text healthCount;
     public Text satietyCount;
     public Text playerLevelCount;
@@ -30,6 +31,7 @@ public class GameManager : Singleton<GameManager>
 	public AudioClip BackgroundMusic;
 	public AudioClip DeathSound;
     public AudioClip soundOfUpLevel;
+    public AudioClip WinSound;
 
 	public bool onPause = false;
 
@@ -129,6 +131,14 @@ public class GameManager : Singleton<GameManager>
 		onPause = true;
 		GameOverPanel.SetActive(true);
 	}
+
+    public void Win()
+    {
+        AudioManager.Instance.PauseMusic();
+        AudioManager.Instance.PlayEffects(WinSound);
+        onPause = true;
+        WinPanel.SetActive(true);
+    }
 
     public void spawnHitText(int x, int y, int damageCount)
     {

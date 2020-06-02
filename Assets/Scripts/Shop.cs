@@ -33,8 +33,7 @@ public class Shop : Singleton<Shop>
 
     public void Start()
     {
-        addGraphics();
-        UpdateInventory();
+
     }
 
     public void AddItem(int id, Item item, int count, DataBase.ItemType type)
@@ -52,6 +51,8 @@ public class Shop : Singleton<Shop>
             items[id].itemGameObj.GetComponentInChildren<Text>().text = count.ToString();
         else
             items[id].itemGameObj.GetComponentInChildren<Text>().text = "";
+
+        UpdateInventory();
     }
 
     public void addGraphics()
@@ -130,16 +131,7 @@ public class Shop : Singleton<Shop>
             }
 
             if (isAdded)
-            {
-                AddItem(currentID, DataBase.Instance.items[items[currentID].id], items[currentID].count - 1, DataBase.Instance.items[items[currentID].id].type);
-
-                if (items[currentID].count == 0)
-                {
-                    AddItem(currentID, DataBase.Instance.items[0], 0, DataBase.Instance.items[0].type);
-                    Transform costText = items[currentID].itemGameObj.transform.GetChild(1);
-                    costText.GetComponent<Text>().text = "";
-                }
-               
+            {            
                 currentID = -1;
                 isAdded = false;
             }
