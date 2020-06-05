@@ -93,8 +93,8 @@ public class GameManager : Singleton<GameManager>
 
 	public void OpenInventory()
 	{
-		onPause = true;
-		InventoryPlayerPanel.SetActive(!InventoryPlayerPanel.activeSelf);
+            onPause = true;
+            InventoryPlayerPanel.SetActive(!InventoryPlayerPanel.activeSelf);
 	}
 
 	public void ToNewLevel()
@@ -146,6 +146,11 @@ public class GameManager : Singleton<GameManager>
         HitText.transform.SetParent(HitParent.transform, false);
         if (damageCount > 0)
             HitText.GetComponent<Text>().text = damageCount.ToString();
+        else if(damageCount < 0)
+        {
+            HitText.GetComponent<Text>().text = (-damageCount).ToString();
+            HitText.GetComponent<Text>().color = Color.green;
+        }
         else
             HitText.GetComponent<Text>().text = "ПРОМАХ";
     }

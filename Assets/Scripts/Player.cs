@@ -101,14 +101,14 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             updateBars(0, 0);
         }
 
-        if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Enemy)
+        if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Enemy)
         {
             isMoving = false;
             HitEnemy((int)stepPoint.x, (int)stepPoint.y);
             stepPoint = transform.position;
         }
 
-        else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Seller)
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Seller)
         {
             isMoving = false;
             stepPoint = transform.position;
@@ -117,7 +117,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             int ItemId = 2;
             int i = 0;
 
-            while(i < 25)
+            while (i < 25)
             {
                 if (ItemId < 23)
                 {
@@ -147,6 +147,15 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             }
         }
 
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Well)
+        {
+            Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] = Generator.TileType.Wall;
+            GameManager.Instance.spawnHitText(0, 0, -50);
+            isMoving = false;
+            stepPoint = transform.position;
+            updateBars(50, 0);
+        }
+
         else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Chest)
         {
             isMoving = false;
@@ -154,11 +163,11 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             GameManager.Instance.Win();
         }
 
-        else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Object)
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Object)
         {
-            for(int i = 0; i < Generator.Instance.containers.Length; i++)
+            for (int i = 0; i < Generator.Instance.containers.Length; i++)
             {
-                if(Generator.Instance.containers[i].transform.position == stepPoint)
+                if (Generator.Instance.containers[i].transform.position == stepPoint)
                 {
                     Generator.Instance.InvtrContainers[i].SetActive(true);
                 }
@@ -169,31 +178,31 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             GameManager.Instance.onPause = true;
         }
 
-        else if(Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Wall || 
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Wall ||
             Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Object)
-        {        
+        {
             isMoving = false;
             stepPoint = transform.position;
         }
 
         else if (transform.position.x == (int)point.x && transform.position.y == (int)point.y)
         {
-            isMoving = false; 
+            isMoving = false;
 
-            if(Generator.Instance.tiles[(int)point.x][(int)point.y] == Generator.TileType.Drop)
-                OpenDrop(); 
+            if (Generator.Instance.tiles[(int)point.x][(int)point.y] == Generator.TileType.Drop)
+                OpenDrop();
         }
 
         else
         {
-            if(!isAnimation && stepPoint != transform.position)
+            if (!isAnimation && stepPoint != transform.position)
             {
                 isAnimation = true;
                 anim.Play("PlayerWalking", 0, 0.1f);
             }
 
-            transform.position = Vector2.MoveTowards(transform.position, stepPoint, GameManager.Instance.gameSpeed * Time.deltaTime);  
-            Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
+            transform.position = Vector2.MoveTowards(transform.position, stepPoint, GameManager.Instance.gameSpeed * Time.deltaTime);
+            Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, -5);
         }  
     }
 

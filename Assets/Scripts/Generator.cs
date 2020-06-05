@@ -179,7 +179,7 @@ public class Generator : Singleton<Generator>
     {
         int tileType = 0;
 
-        if (level > 20)
+        if (level > 1)
             tileType = 1;
 
         for (int i = 1; i < tiles.Length - 1; i++)
@@ -227,7 +227,7 @@ public class Generator : Singleton<Generator>
                     gridPositions.Add(new Vector3(i, j));
 
                 else if (tiles[i][j] == TileType.Floor || tiles[i][j] == TileType.CorridorFloor)
-                    if (tiles[i][j] != TileType.End && (i > 107 || i < 93) && (j > 107 || j < 93))
+                    if (tiles[i][j] != TileType.End && (i > 107 && i < 93) && (j > 107 && j < 93))
                         enemyPositions.Add(new Vector3(i, j));
             }
         }
@@ -268,7 +268,7 @@ public class Generator : Singleton<Generator>
 
     private void addOtherObjectsOnMap(GameObject[] tileArray)
     {
-        otherObjects = new GameObject[roomsCount];
+        otherObjects = new GameObject[roomsCount - 9];
         for (int i = 0; i < otherObjects.Length; i++)
         {
             int randomIndex = Random.Range(0, gridPositions.Count);

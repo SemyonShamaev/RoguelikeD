@@ -48,7 +48,7 @@ public class Enemy : MonoBehaviour
 
                 if (Vector3.Distance(Player.Instance.stepPoint, transform.position) < 2)
                     if (isStep)
-                        if(Player.Instance.stepPoint.x % 1 == 0 && Player.Instance.stepPoint.y % 1 == 0)
+                        if(transform.position.x % 1 == 0 && transform.position.y % 1 == 0)
                             HitPlayer();
 
                 if(isStep)
@@ -76,7 +76,8 @@ public class Enemy : MonoBehaviour
 
         else
         {
-            anim.Play("Walking", 0, 0.5f);
+            if(stepPoint != transform.position)
+                anim.Play("Walking", 0, 0.5f);
             Generator.Instance.tiles[(int)transform.position.x][(int)transform.position.y] = Generator.TileType.Floor;
             Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] = Generator.TileType.Enemy;           
         }
