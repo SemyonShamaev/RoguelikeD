@@ -46,6 +46,8 @@ public class Inventory : Singleton<Inventory>
         Player.Instance.stamina += DataBase.Instance.items[18].stamina;
 
         AddItem(4, DataBase.Instance.items[23], 1, DataBase.Instance.items[23].type);
+
+        AddItem(5, DataBase.Instance.items[26], 1, DataBase.Instance.items[26].type);
         UpdateInventory();
 	}
 

@@ -36,8 +36,32 @@ public class Corridor
  		}
  	}
  	public void CreateCorridor(Room room, int length, int roomWidth, int roomHeight, int columns, int rows, bool firstCorridor) 
- 	{	
- 		direction = (Direction)Random.Range(0,4); 
+ 	{		
+        bool isCollision = true;
+        
+        while (isCollision)
+        {
+            direction = (Direction)Random.Range(0, 4);
+            switch (direction)
+            {
+                case Direction.North:
+                    if (room.yPos + 10 < 200)
+                        isCollision = false;
+                    break;
+                case Direction.East:
+                    if (room.xPos - 10 > 0)
+                        isCollision = false;
+                    break;
+                case Direction.South:
+                    if (room.yPos - 10 > 0)
+                        isCollision = false;
+                    break;
+                case Direction.West:
+                    if (room.xPos + 10 < 200)
+                        isCollision = false;
+                    break;
+            }
+        }
  		Direction oppositeDirection = (Direction)(((int)room.enteringCorridor + 2) % 4);
 		
 		if (!firstCorridor && direction == oppositeDirection)

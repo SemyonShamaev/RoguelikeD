@@ -52,6 +52,7 @@ public class ButtonManager : Singleton<ButtonManager>
     public void Next()
     {
         GameManager.Instance.onPause = false;
+        Time.timeScale = 1;
     }
 
     public void changeVolumeMusic(Slider slid)

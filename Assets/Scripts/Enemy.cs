@@ -37,7 +37,7 @@ public class Enemy : MonoBehaviour
             if(dist < 4 && isSleep)
                 isSleep = false;
 
-            if(!isSleep)
+            if(!isSleep && !Player.Instance.isInvisible)
             {
                 if(canShoot && dist < 4 && dist > 1)
                     if(isStep)

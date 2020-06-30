@@ -38,6 +38,7 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
    		save.SavePlayerInventory();
    		save.SaveContainersInventory();
    		save.SaveContainers();
+        save.SaveOtherObjects();
         save.SaveGameManager();
    		save.SavePlayer();
 
@@ -91,9 +92,15 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
     		Generator.Instance.containers[x].transform.position = new Vector3(cont.position.x, cont.position.y, cont.position.z);
     		x++;
     	}
-    	
 
-    	Inventory.Instance.GetComponent<Inventory>().LoadData(save.inventoryData);
+        int f = 0;
+        foreach (var obj in save.otherObjectsData)
+        {
+            Generator.Instance.otherObjects[f].transform.position = new Vector3(obj.position.x, obj.position.y, obj.position.z);
+            f++;
+        }
+
+        Inventory.Instance.GetComponent<Inventory>().LoadData(save.inventoryData);
     	Player.Instance.GetComponent<Player>().LoadData(save.playerData);
     	GameManager.Instance.LoadData(save.gameManagerData);
     }
@@ -121,6 +128,7 @@ public class Save
 	public List<PlayerInventorySaveData> inventoryData = new List<PlayerInventorySaveData>();
 	public List<EnemyInventorySaveData> enemyInventoryData = new List<EnemyInventorySaveData>();
 	public List<ContainersInventorySaveData> containersInventoryData = new List<ContainersInventorySaveData>();
+    public List<OtherObjectsSaveData> otherObjectsData = new List<OtherObjectsSaveData>();
 
 	[System.Serializable]
 	public struct ContainersSaveData
@@ -141,12 +149,34 @@ public class Save
 		}
 	}
 
-	[System.Serializable]
+    [System.Serializable]
+    public struct OtherObjectsSaveData
+    {
+        public Vec3 position;
+
+        public OtherObjectsSaveData(Vec3 position)
+        {
+            this.position = position;
+        }
+    }
+    public void SaveOtherObjects()
+    {
+        foreach (var obj in Generator.Instance.otherObjects)
+        {
+            Vec3 position = new Vec3(obj.transform.position.x, obj.transform.position.y, obj.transform.position.z);
+            otherObjectsData.Add(new OtherObjectsSaveData(position));
+        }
+    }
+
+    [System.Serializable]
 	public struct PlayerSaveData
 	{
 		public Vec3 position, stepPoint;
 		public Vec2 point;
 		public int currentLifes;
+        public int maxLifes;
+        public int currentSatiety;
+        public int maxSatiety;
         public int levelLimit;
         public int currentExp;
         public int skillPoints;
@@ -154,14 +184,21 @@ public class Save
         public int defense;
         public int agility;
         public int stamina;
+        public int invulnerableCount;
+        public int invisibleCount;
 		public bool isMoving;
+        public bool isInvulnerable;
+        public bool isInvisible;
 
-		public PlayerSaveData(Vec3 position, Vec3 stepPoint, Vec2 point, int currentLifes, int levelLimit, int currentExp, int skillPoints, int attack, int defense, int agility, int stamina, bool isMoving)
+		public PlayerSaveData(Vec3 position, Vec3 stepPoint, Vec2 point, int currentLifes, int maxLifes, int currentSatiety, int maxSatiety,int levelLimit, int currentExp, int skillPoints, int attack, int defense, int agility, int stamina, bool isMoving, bool isInvulnerable, bool isInvisible, int invulnerableCount, int invisibleCount)
 		{
 			this.position = position;
 			this.stepPoint = stepPoint;
 			this.point = point;
 			this.currentLifes = currentLifes;
+            this.maxLifes = maxLifes;
+            this.currentSatiety = currentSatiety;
+            this.maxSatiety = maxSatiety;
             this.levelLimit = levelLimit;
             this.currentExp = currentExp;
             this.skillPoints = skillPoints;
@@ -170,6 +207,10 @@ public class Save
             this.agility = agility;
             this.stamina = stamina;
 			this.isMoving = isMoving;
+            this.isInvulnerable = isInvulnerable;
+            this.isInvisible = isInvisible;
+            this.invulnerableCount = invulnerableCount;
+            this.invisibleCount = invisibleCount;
 		}
 	}
 	public void SavePlayer()
@@ -180,6 +221,9 @@ public class Save
 		Vec3 stepPoint = new Vec3(player.stepPoint.x, player.stepPoint.y, player.stepPoint.z);
 		Vec2 point = new Vec2(player.point.x, player.point.y);
 		int currentLifes = player.currentLifes;
+        int maxLifes = player.maxLifes;
+        int currentSatiety = player.currentSatiety;
+        int maxSatiety = player.maxSatiety;
         int levelLimit = player.levelLimit;
         int currentExp = player.currentExp;
         int skillPoints = player.skillPoints;
@@ -188,7 +232,11 @@ public class Save
         int agility = player.agility;
         int stamina = player.stamina;
 		bool isMoving = player.isMoving;
-		playerData = new PlayerSaveData(position, stepPoint, point, currentLifes, levelLimit, currentExp, skillPoints, attack, defense, agility, stamina, isMoving);
+        bool isInvulnerable = player.isInvulnerable;
+        bool isInvisible = player.isInvisible;
+        int invulnerableCount = player.invulnerableCount;
+        int invisibleCount = player.invisibleCount;
+		playerData = new PlayerSaveData(position, stepPoint, point, currentLifes, maxLifes, currentSatiety, maxSatiety, levelLimit, currentExp, skillPoints, attack, defense, agility, stamina, isMoving, isInvulnerable, isInvisible, invulnerableCount, invisibleCount);
 	}
 
 	[System.Serializable]
@@ -297,28 +345,34 @@ public class Save
 	public struct MapSaveData
 	{
 		public int tiles;
-		public int enemyCount, containersCount;
+		public int enemyCount, containersCount, otherObjectsCount;
         public int[] enemyTypes;
-		public MapSaveData(int tiles, int enemyCount, int containersCount, int[] enemyTypes)
+        public int[] otherObjectsType;
+
+		public MapSaveData(int tiles, int enemyCount, int containersCount, int otherObjectsCount, int[] enemyTypes, int[] otherObjectsType)
 		{
 			this.tiles = tiles;
 			this.enemyCount = enemyCount;
 			this.containersCount = containersCount;
+            this.otherObjectsCount = otherObjectsCount;
             this.enemyTypes = enemyTypes;
+            this.otherObjectsType = otherObjectsType;
 		}
 	}
 	public void SaveMap()
 	{
 		int enemyCount = Generator.Instance.enemies.Length;
 		int containersCount = Generator.Instance.containers.Length;
+        int otherObjectsCount = Generator.Instance.otherObjects.Length;
         int[] enemyTypes = Generator.Instance.enemyTypes;
+        int[] otherObjectsType = Generator.Instance.otherObjectsType;
 
 		for(int i = 0; i < Generator.Instance.MapColumns; i++)
 		{
 			for(int j = 0; j < Generator.Instance.MapRows; j++)
 			{
 				int tiles = (int)Generator.Instance.tiles[i][j];
-				mapData.Add(new MapSaveData(tiles, enemyCount, containersCount, enemyTypes));
+				mapData.Add(new MapSaveData(tiles, enemyCount, containersCount, otherObjectsCount, enemyTypes, otherObjectsType));
 			}
 		}
 	}
@@ -336,6 +390,7 @@ public class Save
             this.levelUp = levelUp;
         }
     }
+
     public void SaveGameManager()
     {
         int levelCount = GameManager.Instance.level;
@@ -369,5 +424,3 @@ public class Save
 		}
 	}
 }
-
-

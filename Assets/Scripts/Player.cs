@@ -7,6 +7,8 @@ using Rogue;
 public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler 
 {
     public GameObject shopPanel;
+    public GameObject learnPanel;
+    public GameObject buyPanel;
  
     public Vector3 point;
     public Vector3 stepPoint;
@@ -18,12 +20,20 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
     public AudioClip PunchSound;
     public AudioClip EatSound;
     public AudioClip DrinkPotionSound;
+    public AudioClip PotionInvulnerableSound;
+    public AudioClip Vomiting;
 
     public bool isMoving;
     public bool isAnimation;
+    public bool isInvulnerable;
+    public bool isInvisible;
+
+    public Text learnText;
 
     public int currentLifes;
     public int maxLifes;
+    public int invulnerableCount;
+    public int invisibleCount;
 
     public int currentSatiety;
     public int maxSatiety;
@@ -95,7 +105,23 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
                 currentLifes--;
                 if(currentLifes <= 0)
                     GameManager.Instance.GameOver();
+            }
 
+            invulnerableCount--;
+            invisibleCount--;
+
+            if(invulnerableCount == 0)
+            {
+                isInvulnerable = false;
+                AudioManager.Instance.PlayEffects(PotionInvulnerableSound);
+                this.GetComponent<SpriteRenderer>().material.color = Color.white;
+            }
+
+            if(invisibleCount == 0)
+            {
+                isInvisible = false;
+                AudioManager.Instance.PlayEffects(PotionInvulnerableSound);
+                this.GetComponent<SpriteRenderer>().material.color = Color.white;
             }
 
             updateBars(0, 0);
@@ -108,52 +134,179 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
             stepPoint = transform.position;
         }
 
-        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Seller)
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.SellerPotion)
         {
             isMoving = false;
             stepPoint = transform.position;
             shopPanel.SetActive(true);
 
-            int ItemId = 2;
-            int i = 0;
+            Shop.Instance.DeleteAllItems();
+            Shop.Instance.AddItem(0, DataBase.Instance.items[14], 1, DataBase.Instance.items[14].type);
+            Shop.Instance.AddItem(1, DataBase.Instance.items[15], 1, DataBase.Instance.items[15].type);
+            Shop.Instance.AddItem(2, DataBase.Instance.items[16], 1, DataBase.Instance.items[16].type);
+            Shop.Instance.AddItem(3, DataBase.Instance.items[17], 1, DataBase.Instance.items[17].type);
+            Shop.Instance.AddItem(4, DataBase.Instance.items[24], 1, DataBase.Instance.items[24].type);
+            Shop.Instance.AddItem(5, DataBase.Instance.items[25], 1, DataBase.Instance.items[25].type);
+            Shop.Instance.AddItem(6, DataBase.Instance.items[26], 1, DataBase.Instance.items[26].type);
 
-            while (i < 25)
-            {
-                if (ItemId < 23)
-                {
-                    Shop.Instance.AddItem(i, DataBase.Instance.items[ItemId], 1, DataBase.Instance.items[ItemId].type);
-                    i++;
-                    ItemId++;
+            GameManager.Instance.PauseGame();
+        }
 
-                    if (DataBase.Instance.items[ItemId].type != DataBase.Instance.items[ItemId - 1].type)
-                    {
-                        float j = (float)(i + 5) / 5;
-                        Debug.Log(j);
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.SellerArmor)
+        {
+            isMoving = false;
+            stepPoint = transform.position;
+            shopPanel.SetActive(true);
 
-                        if (j > 1 && j < 2)
-                            i = 5;
-                        else if (j > 2 && j < 3)
-                            i = 10;
-                        else if (j > 3 && j < 4)
-                            i = 15;
-                        else if (j > 4)
-                            i = 20;
-                    }
-                }
-                else
-                {
-                    i = 26;
-                }
-            }
+            Shop.Instance.DeleteAllItems();
+            Shop.Instance.AddItem(0, DataBase.Instance.items[18], 1, DataBase.Instance.items[18].type);
+            Shop.Instance.AddItem(1, DataBase.Instance.items[19], 1, DataBase.Instance.items[19].type);
+            Shop.Instance.AddItem(2, DataBase.Instance.items[20], 1, DataBase.Instance.items[20].type);
+            Shop.Instance.AddItem(3, DataBase.Instance.items[21], 1, DataBase.Instance.items[21].type);
+            Shop.Instance.AddItem(4, DataBase.Instance.items[22], 1, DataBase.Instance.items[22].type);
+            Shop.Instance.AddItem(5, DataBase.Instance.items[37], 1, DataBase.Instance.items[37].type);
+            Shop.Instance.AddItem(6, DataBase.Instance.items[38], 1, DataBase.Instance.items[38].type);
+            Shop.Instance.AddItem(7, DataBase.Instance.items[39], 1, DataBase.Instance.items[39].type);
+            Shop.Instance.AddItem(8, DataBase.Instance.items[40], 1, DataBase.Instance.items[40].type);
+            Shop.Instance.AddItem(9, DataBase.Instance.items[41], 1, DataBase.Instance.items[41].type);
+
+            GameManager.Instance.PauseGame();
+        }
+
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.SellerFood)
+        {
+            isMoving = false;
+            stepPoint = transform.position;
+            shopPanel.SetActive(true);
+
+            Shop.Instance.DeleteAllItems();
+            Shop.Instance.AddItem(0, DataBase.Instance.items[2], 1, DataBase.Instance.items[2].type);
+            Shop.Instance.AddItem(1, DataBase.Instance.items[3], 1, DataBase.Instance.items[3].type);
+
+            GameManager.Instance.PauseGame();
+        }
+
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.SellerShield)
+        {
+            isMoving = false;
+            stepPoint = transform.position;
+            shopPanel.SetActive(true);
+
+            Shop.Instance.DeleteAllItems();
+            Shop.Instance.AddItem(0, DataBase.Instance.items[9], 1, DataBase.Instance.items[9].type);
+            Shop.Instance.AddItem(1, DataBase.Instance.items[10], 1, DataBase.Instance.items[10].type);
+            Shop.Instance.AddItem(2, DataBase.Instance.items[11], 1, DataBase.Instance.items[11].type);
+            Shop.Instance.AddItem(3, DataBase.Instance.items[12], 1, DataBase.Instance.items[12].type);
+            Shop.Instance.AddItem(4, DataBase.Instance.items[13], 1, DataBase.Instance.items[13].type);
+            Shop.Instance.AddItem(5, DataBase.Instance.items[32], 1, DataBase.Instance.items[32].type);
+            Shop.Instance.AddItem(6, DataBase.Instance.items[33], 1, DataBase.Instance.items[33].type);
+            Shop.Instance.AddItem(7, DataBase.Instance.items[34], 1, DataBase.Instance.items[34].type);
+            Shop.Instance.AddItem(8, DataBase.Instance.items[35], 1, DataBase.Instance.items[35].type);
+            Shop.Instance.AddItem(9, DataBase.Instance.items[36], 1, DataBase.Instance.items[36].type);
+
+            GameManager.Instance.PauseGame();
+        }
+
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Buyer)
+        {
+            isMoving = false;
+            stepPoint = transform.position;
+            buyPanel.SetActive(true);
+
+            Buy.Instance.AddItem(0, DataBase.Instance.items[Inventory.Instance.items[5].id], Inventory.Instance.items[5].count, Inventory.Instance.items[5].type);
+            Buy.Instance.AddItem(1, DataBase.Instance.items[Inventory.Instance.items[6].id], Inventory.Instance.items[6].count, Inventory.Instance.items[6].type);
+            Buy.Instance.AddItem(2, DataBase.Instance.items[Inventory.Instance.items[7].id], Inventory.Instance.items[7].count, Inventory.Instance.items[7].type);
+            Buy.Instance.AddItem(3, DataBase.Instance.items[Inventory.Instance.items[8].id], Inventory.Instance.items[8].count, Inventory.Instance.items[8].type);
+            Buy.Instance.AddItem(4, DataBase.Instance.items[Inventory.Instance.items[9].id], Inventory.Instance.items[9].count, Inventory.Instance.items[9].type);
+            Buy.Instance.AddItem(5, DataBase.Instance.items[Inventory.Instance.items[10].id], Inventory.Instance.items[10].count, Inventory.Instance.items[10].type);
+            Buy.Instance.AddItem(6, DataBase.Instance.items[Inventory.Instance.items[11].id], Inventory.Instance.items[11].count, Inventory.Instance.items[11].type);
+            Buy.Instance.AddItem(7, DataBase.Instance.items[Inventory.Instance.items[12].id], Inventory.Instance.items[12].count, Inventory.Instance.items[12].type);
+            Buy.Instance.AddItem(8, DataBase.Instance.items[Inventory.Instance.items[13].id], Inventory.Instance.items[13].count, Inventory.Instance.items[13].type);
+            Buy.Instance.AddItem(9, DataBase.Instance.items[Inventory.Instance.items[14].id], Inventory.Instance.items[14].count, Inventory.Instance.items[14].type);
+            Buy.Instance.AddItem(10, DataBase.Instance.items[Inventory.Instance.items[15].id], Inventory.Instance.items[15].count, Inventory.Instance.items[15].type);
+            Buy.Instance.AddItem(11, DataBase.Instance.items[Inventory.Instance.items[16].id], Inventory.Instance.items[16].count, Inventory.Instance.items[16].type);
+            Buy.Instance.AddItem(12, DataBase.Instance.items[Inventory.Instance.items[17].id], Inventory.Instance.items[17].count, Inventory.Instance.items[17].type);
+            Buy.Instance.AddItem(13, DataBase.Instance.items[Inventory.Instance.items[18].id], Inventory.Instance.items[18].count, Inventory.Instance.items[18].type);
+            Buy.Instance.AddItem(14, DataBase.Instance.items[Inventory.Instance.items[19].id], Inventory.Instance.items[19].count, Inventory.Instance.items[19].type);
+            Buy.Instance.AddItem(15, DataBase.Instance.items[Inventory.Instance.items[20].id], Inventory.Instance.items[20].count, Inventory.Instance.items[20].type);
+            Buy.Instance.AddItem(16, DataBase.Instance.items[Inventory.Instance.items[21].id], Inventory.Instance.items[21].count, Inventory.Instance.items[21].type);
+            Buy.Instance.AddItem(17, DataBase.Instance.items[Inventory.Instance.items[22].id], Inventory.Instance.items[22].count, Inventory.Instance.items[22].type);
+            Buy.Instance.AddItem(18, DataBase.Instance.items[Inventory.Instance.items[23].id], Inventory.Instance.items[23].count, Inventory.Instance.items[23].type);
+            Buy.Instance.AddItem(19, DataBase.Instance.items[Inventory.Instance.items[24].id], Inventory.Instance.items[24].count, Inventory.Instance.items[24].type);
+
+            GameManager.Instance.PauseGame();
+        }
+
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.SellerWeapon)
+        {
+            isMoving = false;
+            stepPoint = transform.position;
+            shopPanel.SetActive(true);
+
+            Shop.Instance.DeleteAllItems();
+            Shop.Instance.AddItem(0, DataBase.Instance.items[4], 1, DataBase.Instance.items[4].type);
+            Shop.Instance.AddItem(1, DataBase.Instance.items[5], 1, DataBase.Instance.items[5].type);
+            Shop.Instance.AddItem(2, DataBase.Instance.items[6], 1, DataBase.Instance.items[6].type);
+            Shop.Instance.AddItem(3, DataBase.Instance.items[7], 1, DataBase.Instance.items[7].type);
+            Shop.Instance.AddItem(4, DataBase.Instance.items[8], 1, DataBase.Instance.items[8].type);
+            Shop.Instance.AddItem(5, DataBase.Instance.items[27], 1, DataBase.Instance.items[27].type);
+            Shop.Instance.AddItem(6, DataBase.Instance.items[28], 1, DataBase.Instance.items[28].type);
+            Shop.Instance.AddItem(7, DataBase.Instance.items[29], 1, DataBase.Instance.items[29].type);
+            Shop.Instance.AddItem(8, DataBase.Instance.items[30], 1, DataBase.Instance.items[30].type);
+            Shop.Instance.AddItem(9, DataBase.Instance.items[31], 1, DataBase.Instance.items[31].type);
+
+            GameManager.Instance.PauseGame();
         }
 
         else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Well)
         {
+            AudioManager.Instance.PlayEffects(DrinkPotionSound);
             Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] = Generator.TileType.Wall;
             GameManager.Instance.spawnHitText(0, 0, -50);
             isMoving = false;
             stepPoint = transform.position;
             updateBars(50, 0);
+        }
+
+        else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Sign)
+        {
+            isMoving = false;
+            stepPoint = transform.position;
+            learnPanel.SetActive(true);
+            int type = Random.Range(0, 15);
+
+            if (type == 0)
+                learnText.GetComponent<Text>().text = "ÍÀÏÀÄÅÍÈÅ ÓÂÅËÈ×ÈÂÀÅÒ ÑÈËÓ ÓÄÀĞÀ";
+            if (type == 1)
+                learnText.GetComponent<Text>().text = "ËÎÂÊÎÑÒÜ ÓÂÅËÈ×ÈÂÀÅÒ ØÀÍÑ ÏĞÎÌÀÕÀ ÏÎ ÂÀÌ";
+            if (type == 2)
+                learnText.GetComponent<Text>().text = "ÂÛÍÎÑËÈÂÎÑÒÜ ÓÂÅËÈ×ÈÂÀÅÒ ÌÀÊÑÈÌÀËÜÍÎÅ Î×ÊÎ ÇÄÎĞÎÂÜß È ÑÛÒÎÑÒÈ";
+            if (type == 3)
+                learnText.GetComponent<Text>().text = "ÇÀÙÈÒÀ ÓÌÅÍÜØÀÅÒ ÂÕÎÄßÙÈÉ ÓĞÎÍ ÏÎ ÂÀÌ";
+            if (type == 4)
+                learnText.GetComponent<Text>().text = "ÏĞÎÄÎËÆÈÒÅËÜÍÎÑÒÜ İÔÔÅÊÒÀ ÇÅËÈÉ ÇÀÂÈÑÈÒ ÎÒ ÂÛÍÎÑËÈÂÎÑÒÈ";
+            if (type == 5)
+                learnText.GetComponent<Text>().text = "ÏÎÄÇÅÌÅËÜß Î×ÅÍÜ ÎÏÀÑÍÛÅ, ÁÓÄÜÒÅ ÎÑÒÎĞÎÆÍÛ!!!";
+            if (type == 6)
+                learnText.GetComponent<Text>().text = "ÅÑËÈ ÂÀØÀ ØÊÀËÀ ÑÛÒÎÑÒÈ ÓÏÀÄÅÒ ÄÎ ÍÓËß, ÂÛ ÁÓÄÅÒÅ ÏÎËÓ×ÀÒÜ ÓĞÎÍ ÊÀÆÄÛÉ ÕÎÄ";
+            if (type == 7)
+                learnText.GetComponent<Text>().text = "ÑËÅÄÈÒÅ ÇÀ ÂÀØÈÌÈ ØÊÀËÀÌÈ ÇÄÎĞÎÂÜß È ÑÛÒÎÑÒÈ";
+            if (type == 8)
+                learnText.GetComponent<Text>().text = "ÂÑÅÃÄÀ ÈÌÅÉÒÅ ÇÀÏÀÑ ÅÄÛ";
+            if (type == 9)
+                learnText.GetComponent<Text>().text = "ÅÑËÈ ÂÛ ÂÛÉÄÅÒÅ ÈÇ ÈÃĞÛ, ÂÀØ ÏĞÎÃĞÅÑÑ ÑÎÕĞÀÍÈÒÑß";
+            if (type == 10)
+                learnText.GetComponent<Text>().text = "ÊÀÆÄÎÅ ÏÎÄÍßÒÈÅ ÓĞÎÂÍß ÁÓÄÅÒ ÄÀÂÀÒÜÑß ÑËÎÆÍÅÅ Ñ ÊÀÆÄÛÌ ĞÀÇÎÌ";
+            if (type == 11)
+                learnText.GetComponent<Text>().text = "ÂÛ ÍÅ ÑÌÎÆÅÒÅ ÁĞÀÒÜ ÏĞÅÄÌÅÒÛ, ÅÑËÈ ÂÀØ ÈÍÂÅÍÒÀĞÜ ÁÓÄÅÒ ÇÀÏÎËÍÅÍ";
+            if (type == 12)
+                learnText.GetComponent<Text>().text = "ÇÀÏÎÌÈÍÀÉÒÅ İÔÔÅÊÒ ÊÀÆÄÎÃÎ ÇÅËÜß";
+            if (type == 13)
+                learnText.GetComponent<Text>().text = "ÍÅÊÎÒÎĞÛÅ ÇÅËÜß ÌÎÃÓÒ ÓÁÈÒÜ ÂÀÑ, ÁÓÄÜÒÅ ÎÑÒÎĞÎÆÍÛ!!!";
+            if (type == 14)
+                learnText.GetComponent<Text>().text = "ÊÎËÎÄÅÖ ÂÎÑÑÒÀÍÀÂËÈÂÀÅÒ ÂÀØÅ ÇÄÎĞÎÂÜÅ";
+
+            GameManager.Instance.PauseGame();
         }
 
         else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Chest)
@@ -175,7 +328,7 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
             isMoving = false;
             stepPoint = transform.position;
-            GameManager.Instance.onPause = true;
+            GameManager.Instance.PauseGame();
         }
 
         else if (Generator.Instance.tiles[(int)stepPoint.x][(int)stepPoint.y] == Generator.TileType.Wall ||
@@ -208,6 +361,9 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
     private void HitEnemy(int x, int y)
     {
+        isInvisible = false;
+        invisibleCount = 0;
+
         for(int i = 0; i < Generator.Instance.enemies.Length; i++)
         {
             Enemy enemy = Generator.Instance.enemies[i].GetComponent<Enemy>(); 
@@ -254,6 +410,8 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
 
             if (l <= 0)
                 l = 1;
+            else if (isInvulnerable)
+                l = 0;
 
             point = stepPoint;
 
@@ -292,13 +450,34 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
                 updateBars(50, 0);
                 break;
             case "Potion_2":
-                Debug.Log("Âû âûïèëè çåëüå");
+                isInvulnerable = true;
+                invulnerableCount = 30 + stamina;
+                AudioManager.Instance.PlayEffects(PotionInvulnerableSound);
+                this.GetComponent<SpriteRenderer>().material.color = Color.red;
                 break;
             case "Potion_3":
-                Debug.Log("Âû âûïèëè çåëüå");
+                GetDamage(120);
                 break;
             case "Potion_4":
-                Debug.Log("Âû âûïèëè çåëüå");
+                isInvisible = true;
+                invisibleCount = 30 + stamina;
+                AudioManager.Instance.PlayEffects(PotionInvulnerableSound);
+                this.GetComponent<SpriteRenderer>().material.color = Color.green;
+                break;
+            case "Potion_5":
+                AudioManager.Instance.PlayEffects(Vomiting);
+                updateBars(0, -100);
+                break;
+            case "Potion_6":
+                AudioManager.Instance.PlayEffects(PotionInvulnerableSound);
+                getExp(500);
+                break;
+            case "Potion_7":
+                AudioManager.Instance.PlayEffects(PotionInvulnerableSound);
+                int randomIndex = Random.Range(0, Generator.Instance.enemyPositions.Count);
+                Vector3 randomPosition = Generator.Instance.enemyPositions[randomIndex];
+                transform.position = randomPosition;
+                Camera.main.transform.position = new Vector3(transform.position.x, transform.position.y, -5);
                 break;
             default:
                 break;
@@ -524,20 +703,33 @@ public class Player : Singleton<Player>, IPointerDownHandler, IPointerUpHandler
         point = new Vector2(save.point.x, save.point.y);
 
         currentLifes = save.currentLifes;
+        maxLifes = save.maxLifes;
+        currentSatiety = save.currentSatiety;
+        maxSatiety = save.maxSatiety;
         levelLimit = save.levelLimit;
         currentExp = save.currentExp;
         isMoving = save.isMoving;
+        isInvulnerable = save.isInvulnerable;
+        isInvisible = save.isInvisible;
 
+        invulnerableCount = save.invulnerableCount;
+        invisibleCount = save.invisibleCount;
         skillPoints = save.skillPoints;
         attack = save.attack;
         defense = save.defense;
         agility = save.agility;
         stamina = save.stamina;
 
+        if(isInvulnerable)
+            this.GetComponent<SpriteRenderer>().material.color = Color.red;
+
         Camera.main.transform.position = new Vector3 (transform.position.x, transform.position.y, -5);
         HealthBar.value = (float)currentLifes / (float)maxLifes;
+        SatietyBar.value = (float)currentSatiety / (float)maxSatiety;
+        GameManager.Instance.satietyCount.text = Player.Instance.currentSatiety.ToString() + "/" + Player.Instance.maxSatiety.ToString();
+        GameManager.Instance.healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
 
-        if(currentLifes <= 0)
+        if (currentLifes <= 0)
         {
             isDeath = true;
             anim.Play("PlayerDeath", 0, 0.1f);

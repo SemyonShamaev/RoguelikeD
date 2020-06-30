@@ -155,6 +155,7 @@ public class InventoryEnemy : Singleton<DataBase>
         {
             AddItem(currentID, DataBase.Instance.items[0], 0, DataBase.Instance.items[0].type);
             Inventory.Instance.UpdateInventory();
+            GameManager.Instance.goldCount.text = Inventory.Instance.items[0].count.ToString();
             currentID = -1;
             isAdded = false;
         }

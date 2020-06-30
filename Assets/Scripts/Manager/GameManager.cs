@@ -7,7 +7,7 @@ using Rogue;
 
 public class GameManager : Singleton<GameManager>
 {
-   	public int level = 1;
+   	public int level;
     public int playerLevel;
     public float gameSpeed;
 
@@ -27,6 +27,7 @@ public class GameManager : Singleton<GameManager>
     public Text satietyCount;
     public Text playerLevelCount;
     public Text playerCharacteristic;
+    public Text goldCount;
 
 	public AudioClip BackgroundMusic;
 	public AudioClip DeathSound;
@@ -50,6 +51,7 @@ public class GameManager : Singleton<GameManager>
             "/" + Player.Instance.maxSatiety.ToString();
 
         playerLevelCount.text = playerLevel.ToString();
+        goldCount.text = Inventory.Instance.items[0].count.ToString();
 	}
 
    	private void Awake()
@@ -93,8 +95,8 @@ public class GameManager : Singleton<GameManager>
 
 	public void OpenInventory()
 	{
-            onPause = true;
-            InventoryPlayerPanel.SetActive(!InventoryPlayerPanel.activeSelf);
+         onPause = true;
+         InventoryPlayerPanel.SetActive(!InventoryPlayerPanel.activeSelf);
 	}
 
 	public void ToNewLevel()
@@ -105,7 +107,7 @@ public class GameManager : Singleton<GameManager>
 		TransitionAnim = GameObject.Find("Panel").GetComponent<Animation>();
 		TransitionAnim.Play("Transition");
 
-		NextLevelPanel.SetActive(false);
+        NextLevelPanel.SetActive(false);
 
 		DestroyAllObjects();
 
@@ -122,7 +124,9 @@ public class GameManager : Singleton<GameManager>
 	public void DestroyAllObjects()
 	{
 		foreach (Transform child in transform) Destroy(child.gameObject);
-	}
+
+        foreach (Transform child in HitParent.transform) Destroy(child.gameObject);
+    }
 
 	public void GameOver()
 	{
@@ -176,5 +180,7 @@ public class GameManager : Singleton<GameManager>
         PlayerUpButton.SetActive(save.levelUp);
 
         healthCount.text = Player.Instance.currentLifes.ToString() + "/" + Player.Instance.maxLifes.ToString();
+
+        goldCount.text = Inventory.Instance.items[0].count.ToString();
     }
 }

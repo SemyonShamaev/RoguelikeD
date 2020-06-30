@@ -36,6 +36,14 @@ public class Shop : Singleton<Shop>
 
     }
 
+    public void DeleteAllItems()
+    {
+        for(int i = 0; i < 25; i++)
+        {
+            AddItem(i, DataBase.Instance.items[0], 0, DataBase.Instance.items[0].type);
+        }
+    }
+
     public void AddItem(int id, Item item, int count, DataBase.ItemType type)
     {
         if (items.Count == 0)
@@ -146,6 +154,7 @@ public class Shop : Singleton<Shop>
 
     public void UpdateInventory()
     {
+        GameManager.Instance.goldCount.text = Inventory.Instance.items[0].count.ToString();
         for (int i = 0; i < maxCount; i++)
         {
             items[i].itemGameObj.GetComponent<Image>().sprite = DataBase.Instance.items[items[i].id].image;
