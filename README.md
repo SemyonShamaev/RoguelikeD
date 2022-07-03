@@ -1,3 +1,3 @@
 # RoguelikeD
 Игра в жанре roguelike
-![Image alt](https://github.com/semyonShamaev/RoguelikeD/raw/Master/roguelikeImage.png)
+![Image alt](https://github.com/SemyonShamaev/RoguelikeD/blob/master/roguelikeImage.png)
